@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.zmd.charge.settings.EndfieldHeaderPreference/>
+    <PreferenceCategory android:title="@string/pref_group_display">
+        <SwitchPreference
+            android:key="show_remaining"
+            android:title="@string/pref_show_remaining"
+            android:summary="@string/pref_show_remaining_summary"
+            android:defaultValue="true"/>
+        <ListPreference
+            android:key="background"
+            android:title="@string/pref_background"
+            android:entries="@array/background_entries"
+            android:entryValues="@array/background_values"
+            android:defaultValue="solid"/>
+        <SeekBarPreference
+            android:key="low_battery_threshold"
+            android:title="@string/pref_low_threshold"
+            android:summary="@string/pref_low_threshold_summary"
+            android:defaultValue="20"
+            android:min="5"
+            android:max="40"/>
+        <EditTextPreference
+            android:key="capacity_fallback"
+            android:title="@string/pref_capacity_fallback"
+            android:summary="@string/pref_capacity_fallback_summary"
+            android:defaultValue="5500"
+            android:inputType="number"/>
+    </PreferenceCategory>
+</PreferenceScreen>

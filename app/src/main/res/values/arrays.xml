@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="background_entries">
+        <item>@string/pref_background_solid</item>
+        <item>@string/pref_background_transparent</item>
+    </array>
+    <array name="background_values">
+        <item>solid</item>
+        <item>transparent</item>
+    </array>
+</resources>

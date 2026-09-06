@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_capsule">#312F30</color>
+    <color name="accent_yellow_green">#C6CA4C</color>
+    <color name="accent_red">#FF4D4F</color>
+    <color name="icon_plate">#E9E7E4</color>
+    <color name="icon_dark">#141313</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#99FFFFFF</color>
+    <color name="text_tertiary">#66FFFFFF</color>
+    <color name="badge_dark">#262425</color>
+    <color name="track_dark">#4A4849</color>
+</resources>

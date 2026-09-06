@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">终末地电量</string>
+    <string name="widget_name">终末地电力</string>
+    <string name="widget_desc">终末地风格 电量/容量 显示</string>
+    <string name="settings_title">设置</string>
+    <string name="pref_group_display">显示</string>
+    <string name="pref_capacity_fallback">容量表兜底值 (mAh)</string>
+    <string name="pref_capacity_fallback_summary">表里没有你的机型时使用的标称容量</string>
+    <string name="pref_show_remaining">显示剩余容量</string>
+    <string name="pref_show_remaining_summary">在组件上显示当前剩余的电量 (mAh)</string>
+    <string name="pref_background">组件背景</string>
+    <string name="pref_background_solid">实心深炭</string>
+    <string name="pref_background_transparent">透明</string>
+    <string name="pref_low_threshold">低电量阈值</string>
+    <string name="pref_low_threshold_summary">低于此电量时文字变红</string>
+    <string name="charging">充电中</string>
+    <string name="fraction_fmt">剩 %1$d mAh</string>
+    <string name="design_fmt">满充 %1$d mAh</string>
+</resources>

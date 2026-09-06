@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/capsule_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/widget_bg_capsule">
+
+        <!-- 正常电量显示：终末地风格 -->
+        <LinearLayout
+            android:id="@+id/normal_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <!-- 左：白色图标底板 + 深色闪电 -->
+            <FrameLayout
+                android:layout_width="28dp"
+                android:layout_height="28dp">
+                <FrameLayout
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/plate_bg"/>
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_bolt"
+                    android:contentDescription="@string/widget_name"/>
+            </FrameLayout>
+
+            <!-- 容量：现量 / 设置（数字等大）+ mAh -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="10dp">
+                <TextView android:id="@+id/txt_remaining"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="18sp" android:textStyle="bold"
+                    android:fontFamily="@font/harmonyos_sans_sc_medium" android:textColor="@color/text_primary"
+                    android:text="5500"/>
+                <TextView android:id="@+id/txt_max"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp" android:textSize="18sp"
+                    android:fontFamily="@font/harmonyos_sans_sc_medium" android:textColor="@color/text_secondary"
+                    android:text="/ 5500"/>
+                <TextView android:id="@+id/txt_unit"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp" android:textSize="11sp"
+                    android:fontFamily="@font/harmonyos_sans_sc_regular" android:textColor="@color/text_tertiary"
+                    android:text="mAh"/>
+            </LinearLayout>
+
+            <FrameLayout android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+            <!-- 百分比 -->
+            <TextView android:id="@+id/txt_percent"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="18sp" android:textStyle="bold"
+                android:fontFamily="@font/harmonyos_sans_sc_medium" android:textColor="@color/text_primary"
+                android:text="100%"/>
+
+            <!-- 徽章：深墨圆盘 + 黄绿进度环 + 手机 -->
+            <FrameLayout
+                android:layout_width="40dp" android:layout_height="40dp"
+                android:layout_marginStart="8dp">
+                <FrameLayout
+                    android:layout_width="40dp" android:layout_height="40dp"
+                    android:background="@drawable/badge_disk"/>
+                <ImageView android:id="@+id/ring_image"
+                    android:layout_width="40dp" android:layout_height="40dp"
+                    android:layout_gravity="center" android:src="@drawable/arc_100"
+                    android:contentDescription="@string/widget_name"/>
+                <ImageView android:id="@+id/ic_badge_phone"
+                    android:layout_width="20dp" android:layout_height="20dp"
+                    android:layout_gravity="center" android:src="@drawable/ic_phone"
+                    android:contentDescription="@string/widget_name"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- 充电提示层：左 logo 右文字（仅插入时几秒） -->
+        <LinearLayout
+            android:id="@+id/charge_hint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingStart="28dp"
+            android:paddingEnd="28dp"
+            android:visibility="gone">
+            <ImageView android:id="@+id/charge_logo"
+                android:layout_width="52dp" android:layout_height="52dp"
+                android:src="@drawable/ic_bolt_glow"
+                android:contentDescription="@string/widget_name"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:layout_marginStart="18dp">
+                <TextView android:id="@+id/charge_sub"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:fontFamily="@font/harmonyos_sans_sc_medium" android:textColor="@color/accent_yellow_green"
+                    android:letterSpacing="0.12" android:text="/// SUPER CHARGE"/>
+                <TextView android:id="@+id/charge_title"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp" android:textSize="20sp" android:textStyle="bold"
+                    android:fontFamily="@font/harmonyos_sans_sc_bold" android:textColor="@color/text_primary"
+                    android:text="快充模式"/>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>
