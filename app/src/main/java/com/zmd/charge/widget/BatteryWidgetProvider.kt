@@ -63,7 +63,7 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
         views.setViewVisibility(R.id.charge_hint, View.GONE)
 
         views.setTextViewText(R.id.txt_percent, snap.percent.toString() + "%")
-        views.setImageViewResource(R.id.ring_image, arcRes(context, snap.percent))
+        views.setImageViewResource(R.id.ring_image, arcRes(context, snap.percent, snap.charging))
         views.setTextViewText(R.id.txt_remaining, snap.remainingMah.toString())
         views.setTextViewText(R.id.txt_max, "/ " + snap.designMah.toString())
 
@@ -90,8 +90,9 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
     mgr.updateAppWidget(id, views)
 }
 
-/** 电量百分比 -> 预渲染进度环 PNG 资源。按最近 5% 取档。 */
-private fun arcRes(context: Context, percent: Int): Int {
+/** 电量百分比 -> 预渲染进度环 PNG 资源。按最近 5% 取档；充电时用绿色环(arcg_)，否则黄绿环(arc_)。 */
+private fun arcRes(context: Context, percent: Int, charging: Boolean): Int {
     val level = (((percent + 2) / 5) * 5).coerceIn(0, 100)
-    return context.resources.getIdentifier("arc_%02d".format(level), "drawable", context.packageName)
+    val prefix = if (charging) "arcg_%02d" else "arc_%02d"
+    return context.resources.getIdentifier(prefix.format(level), "drawable", context.packageName)
 }
