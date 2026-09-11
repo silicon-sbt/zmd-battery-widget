@@ -3,6 +3,8 @@
 一个复刻《明日方舟：终末地》工业/超充风格**电量桌面小组件**（Android AppWidget）。
 视觉与配色沿用 [QinAnze/zmd-charge](https://github.com/QinAnze/zmd-charge)（Windows 端灵动岛 HUD）的实测取色与矢量几何（MIT 许可）。
 
+![组件预览](docs/preview.png)
+
 > 样式参考：`QinAnze/zmd-charge`（Windows 端，灵动画风，MIT）。本项目为 Android 原生小组件实现，仅复用其视觉元素与配色，底层逻辑（电量读取、组件宿主、设置页）为本项目原创。
 
 ## 功能
