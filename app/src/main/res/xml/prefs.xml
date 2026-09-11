@@ -27,4 +27,11 @@
             android:defaultValue="5500"
             android:inputType="number"/>
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_group_about">
+        <Preference
+            android:key="check_update"
+            android:title="@string/pref_check_update"
+            android:summary="@string/pref_check_update_summary"/>
+    </PreferenceCategory>
 </PreferenceScreen>
