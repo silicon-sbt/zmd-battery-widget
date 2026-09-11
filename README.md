@@ -11,6 +11,7 @@
 - **1×3 桌面小组件**（横向长条，可横向拉伸）
 - 正常态复刻终末地"数字态"HUD：深炭胶囊、白色图标底板+深色闪电、**剩余/满充容量（等大数字 + mAh）**、百分比、右侧**黄绿进度环 + 手机徽章**
 - **插入充电器**：短暂弹出**充电提示动画**（左发光闪电 logo + 右文：快充模式 / 充电中），**淡入→呼吸→约3.4秒后淡出**，自动回到电量显示；用 `goAsync()` 保活进程确保回落
+- **充电时进度环变绿色**（#4CD964），未充电为黄绿（#C6CA4C）
 - **低电量（<阈值）** 数字变红；**满充设计容量**按机型查内置表
 - 点击组件进入**终末地风设置页**（原生 `androidx.preference` + 深炭/黄绿主题 + hero 顶部）
 - 字体使用**鸿蒙开源字体 HarmonyOS Sans SC**
@@ -58,3 +59,6 @@ gradle assembleDebug   # 产物：app/build/outputs/apk/debug/app-debug.apk
 本项目的视觉风格与配色**强烈参考并复刻**自 [QinAnze/zmd-charge](https://github.com/QinAnze/zmd-charge)（Windows 端终末地风格电量 HUD）。**非常感谢原作者 QinAnze 开源并采用 MIT 许可**，让我能把这份好看的"终末地工业/超充"设计用在自己的安卓小组件上。本项目的底层实现（电量读取、桌面组件、设置页、充电动画）为原创，仅复用了它的视觉要素与实测色板。
 
 字体使用 **HarmonyOS Sans SC**（[ajacocks/harmonyos-sans-font](https://github.com/ajacocks/harmonyos-sans-font)，HUAWEI 开源、免费商用，见 `FONT_LICENSE.txt`）。
+## 许可 (License)
+
+本项目采用 **MIT License**，见 [LICENSE](LICENSE)。
