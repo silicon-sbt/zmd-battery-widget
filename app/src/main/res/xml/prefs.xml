@@ -28,6 +28,17 @@
             android:inputType="number"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_group_runtime">
+        <Preference
+            android:key="battery_opt"
+            android:title="@string/pref_battery_opt"
+            android:summary="@string/pref_battery_opt_summary"/>
+        <Preference
+            android:key="autostart"
+            android:title="@string/pref_autostart"
+            android:summary="@string/pref_autostart_summary"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_group_about">
         <Preference
             android:key="check_update"
