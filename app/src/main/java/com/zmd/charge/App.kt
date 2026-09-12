@@ -45,8 +45,7 @@ class App : Application() {
             } else {
                 BatteryWidgetProvider.showChargeHint = false
                 BatteryWidgetProvider.hintAlpha = 1f
-                // 提示结束后回到正常显示；此时仍处于充电（提示由插入触发）
-                BatteryWidgetProvider.refresh(this@App, chargingOverride = true)
+                BatteryWidgetProvider.refresh(this@App)
                 finishHint()
             }
         }
@@ -58,16 +57,17 @@ class App : Application() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 Intent.ACTION_POWER_CONNECTED -> {
-                    // 保活进程直到动画+回落完成
-                    pendingResult = goAsync()
+                    BatteryWidgetProvider.forceChargingState(true)
+                    pendingResult = goAsync()   // 保活进程直到动画+回落完成
                     startHint(context)
                 }
                 Intent.ACTION_POWER_DISCONNECTED -> {
                     stopAll()
                     BatteryWidgetProvider.showChargeHint = false
                     BatteryWidgetProvider.hintAlpha = 1f
-                    // 拔电瞬间用事件状态覆盖，绿环立即回落（不依赖 sticky 广播的更新时序）
-                    BatteryWidgetProvider.refresh(context, chargingOverride = false)
+                    // 拔电后 5 秒内锁定"未充电"，避免滞后的 sticky 广播把绿环刷回来
+                    BatteryWidgetProvider.forceChargingState(false)
+                    BatteryWidgetProvider.refresh(context)
                     finishHint()
                 }
                 else -> BatteryWidgetProvider.refresh(context)
@@ -123,7 +123,19 @@ class App : Application() {
         pr.finish()
     }
 
+    /**
+     * 快充判定：读实际充电电流 CURRENT_NOW(通常 µA，部分机型 mA)。
+     * 电流 >= 1500mA 视为快充；读不到时回退到"墙充(AC)且非 USB"的粗略判断。
+     */
     private fun isFastCharge(context: Context): Boolean {
+        val bm = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+        val cur = try { bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) } catch (e: Exception) { null }
+        var mA = 0
+        if (cur != null && cur != Int.MIN_VALUE && cur != 0) {
+            val a = kotlin.math.abs(cur)
+            mA = if (a > 20000) a / 1000 else a   // 量级判断：µA → mA
+        }
+        if (mA > 0) return mA >= 1500
         val i = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val plugged = i?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1
         return plugged == BatteryManager.BATTERY_PLUGGED_AC

@@ -55,14 +55,29 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         @JvmStatic
         var hintAlpha: Float = 1f
 
+        /** 插拔电后强制锁定的充电状态（避免被滞后的 sticky 广播覆盖）；带有效期。 */
+        @JvmStatic
+        var forcedCharging: Boolean? = null
+        private var forcedUntil: Long = 0L
+
+        /** 插拔电瞬间锁定充电状态若干毫秒，保证绿环/黄绿环立即、稳定地切换。 */
+        fun forceChargingState(value: Boolean, durationMs: Long = 5000L) {
+            forcedCharging = value
+            forcedUntil = android.os.SystemClock.elapsedRealtime() + durationMs
+        }
+
+        /** 当前生效的充电状态覆盖（过期返回 null）。 */
+        fun effectiveChargingOverride(): Boolean? =
+            if (android.os.SystemClock.elapsedRealtime() < forcedUntil) forcedCharging else null
+
         /** 刷新所有已放置的组件实例（设置页变更/电量变化/闹钟触发时调用）。 */
-        fun refresh(context: Context, chargingOverride: Boolean? = null) {
+        fun refresh(context: Context) {
             val mgr = AppWidgetManager.getInstance(context)
             val ids = mgr.getAppWidgetIds(
                 ComponentName(context, BatteryWidgetProvider::class.java)
             )
             if (ids.isEmpty()) return
-            ids.forEach { renderWidget(context, mgr, it, chargingOverride) }
+            ids.forEach { renderWidget(context, mgr, it) }
         }
 
         /** 安排周期刷新（幂等：同 PendingIntent 会覆盖）。 */
@@ -96,8 +111,8 @@ class BatteryWidgetProvider : AppWidgetProvider() {
     }
 }
 
-private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int, chargingOverride: Boolean? = null) {
-    val snap = BatteryData.read(context, chargingOverride)
+private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
+    val snap = BatteryData.read(context, BatteryWidgetProvider.effectiveChargingOverride())
     val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
     val bg = if (Prefs.background(context) == "transparent")

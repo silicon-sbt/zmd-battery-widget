@@ -1,17 +1,23 @@
 package com.zmd.charge.settings
 
+import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
+import com.zmd.charge.LiveService
 import com.zmd.charge.R
 import com.zmd.charge.widget.BatteryWidgetProvider
 
@@ -34,6 +40,10 @@ class SettingsFragment : PreferenceFragmentCompat(),
         }
         findPreference<Preference>("autostart")?.setOnPreferenceClickListener {
             openAppDetails()
+            true
+        }
+        findPreference<SwitchPreference>("live_service")?.setOnPreferenceChangeListener { _, newValue ->
+            setLiveService(newValue as Boolean)
             true
         }
 
@@ -93,6 +103,27 @@ class SettingsFragment : PreferenceFragmentCompat(),
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + ctx.packageName))
             )
         } catch (_: Exception) {}
+    }
+
+    // ---------- 实时刷新（前台服务） ----------
+
+    private fun setLiveService(on: Boolean) {
+        val ctx = context ?: return
+        if (on) {
+            if (Build.VERSION.SDK_INT >= 33 &&
+                ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+            try {
+                ContextCompat.startForegroundService(ctx, Intent(ctx, LiveService::class.java))
+            } catch (_: Throwable) {}
+            Toast.makeText(ctx, "已开启实时刷新（静默常驻通知）", Toast.LENGTH_SHORT).show()
+        } else {
+            try { ctx.stopService(Intent(ctx, LiveService::class.java)) } catch (_: Throwable) {}
+            Toast.makeText(ctx, "已关闭实时刷新", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // ---------- 检查更新 ----------

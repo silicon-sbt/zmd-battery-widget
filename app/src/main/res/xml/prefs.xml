@@ -29,6 +29,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_group_runtime">
+        <SwitchPreference
+            android:key="live_service"
+            android:title="@string/pref_live_service"
+            android:summary="@string/pref_live_service_summary"
+            android:defaultValue="false"/>
         <Preference
             android:key="battery_opt"
             android:title="@string/pref_battery_opt"
