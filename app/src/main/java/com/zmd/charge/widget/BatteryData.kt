@@ -13,7 +13,11 @@ data class BatterySnapshot(
 )
 
 object BatteryData {
-    fun read(context: Context): BatterySnapshot {
+    /**
+     * @param chargingOverride 非空时强制使用该充电状态。
+     *   用于插拔电广播到达瞬间（此时 sticky 电量广播可能还没更新，会读到旧状态导致响应迟滞）。
+     */
+    fun read(context: Context, chargingOverride: Boolean? = null): BatterySnapshot {
         val design = DeviceCapacity.lookup(context)
 
         val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
@@ -27,10 +31,9 @@ object BatteryData {
             charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                     status == BatteryManager.BATTERY_STATUS_FULL
         }
+        if (chargingOverride != null) charging = chargingOverride
 
-        // 默认：剩余 = 百分比 × 满充设计容量
         var remaining = design * percent / 100
-        // CHARGE_COUNTER(µAh) 仅在与百分比推算大致吻合(±25%)时才采用，避免机型读数不准导致数值跳变
         try {
             val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             val counter = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)

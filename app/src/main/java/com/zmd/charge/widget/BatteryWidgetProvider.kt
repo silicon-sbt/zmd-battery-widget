@@ -56,13 +56,13 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         var hintAlpha: Float = 1f
 
         /** 刷新所有已放置的组件实例（设置页变更/电量变化/闹钟触发时调用）。 */
-        fun refresh(context: Context) {
+        fun refresh(context: Context, chargingOverride: Boolean? = null) {
             val mgr = AppWidgetManager.getInstance(context)
             val ids = mgr.getAppWidgetIds(
                 ComponentName(context, BatteryWidgetProvider::class.java)
             )
             if (ids.isEmpty()) return
-            ids.forEach { renderWidget(context, mgr, it) }
+            ids.forEach { renderWidget(context, mgr, it, chargingOverride) }
         }
 
         /** 安排周期刷新（幂等：同 PendingIntent 会覆盖）。 */
@@ -96,8 +96,8 @@ class BatteryWidgetProvider : AppWidgetProvider() {
     }
 }
 
-private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
-    val snap = BatteryData.read(context)
+private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int, chargingOverride: Boolean? = null) {
+    val snap = BatteryData.read(context, chargingOverride)
     val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
     val bg = if (Prefs.background(context) == "transparent")

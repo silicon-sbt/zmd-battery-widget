@@ -45,7 +45,8 @@ class App : Application() {
             } else {
                 BatteryWidgetProvider.showChargeHint = false
                 BatteryWidgetProvider.hintAlpha = 1f
-                BatteryWidgetProvider.refresh(this@App)
+                // 提示结束后回到正常显示；此时仍处于充电（提示由插入触发）
+                BatteryWidgetProvider.refresh(this@App, chargingOverride = true)
                 finishHint()
             }
         }
@@ -65,7 +66,8 @@ class App : Application() {
                     stopAll()
                     BatteryWidgetProvider.showChargeHint = false
                     BatteryWidgetProvider.hintAlpha = 1f
-                    BatteryWidgetProvider.refresh(context)
+                    // 拔电瞬间用事件状态覆盖，绿环立即回落（不依赖 sticky 广播的更新时序）
+                    BatteryWidgetProvider.refresh(context, chargingOverride = false)
                     finishHint()
                 }
                 else -> BatteryWidgetProvider.refresh(context)
