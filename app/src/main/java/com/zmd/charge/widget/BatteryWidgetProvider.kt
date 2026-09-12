@@ -1,5 +1,6 @@
 package com.zmd.charge.widget
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -19,7 +20,31 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         ids.forEach { renderWidget(context, mgr, it) }
     }
 
+    override fun onEnabled(context: Context) {
+        // 组件被添加：启动周期刷新兜底
+        scheduleRefresh(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        // 最后一个组件被移除：停止周期刷新
+        cancelRefresh(context)
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_REFRESH) {
+            // 周期闹钟触发：把进程唤醒并刷新组件
+            refresh(context)
+            scheduleRefresh(context) // 保险：重排下一次
+        } else {
+            super.onReceive(context, intent)
+        }
+    }
+
     companion object {
+        const val ACTION_REFRESH = "com.zmd.charge.widget.REFRESH"
+        /** 周期刷新间隔；系统对 setRepeating 的下限约 60s。 */
+        private const val REFRESH_INTERVAL_MS = 60_000L
+
         /** 是否正在显示"插入充电提示动画"（仅插入后几秒内为 true）。 */
         @JvmStatic
         var showChargeHint: Boolean = false
@@ -30,13 +55,43 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         @JvmStatic
         var hintAlpha: Float = 1f
 
-        /** 刷新所有已放置的组件实例。 */
+        /** 刷新所有已放置的组件实例（设置页变更/电量变化/闹钟触发时调用）。 */
         fun refresh(context: Context) {
             val mgr = AppWidgetManager.getInstance(context)
             val ids = mgr.getAppWidgetIds(
                 ComponentName(context, BatteryWidgetProvider::class.java)
             )
+            if (ids.isEmpty()) return
             ids.forEach { renderWidget(context, mgr, it) }
+        }
+
+        /** 安排周期刷新（幂等：同 PendingIntent 会覆盖）。 */
+        fun scheduleRefresh(context: Context) {
+            try {
+                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                am.setRepeating(
+                    AlarmManager.RTC,
+                    System.currentTimeMillis() + REFRESH_INTERVAL_MS,
+                    REFRESH_INTERVAL_MS,
+                    refreshIntent(context)
+                )
+            } catch (_: Throwable) {}
+        }
+
+        fun cancelRefresh(context: Context) {
+            try {
+                val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                am.cancel(refreshIntent(context))
+            } catch (_: Throwable) {}
+        }
+
+        private fun refreshIntent(context: Context): PendingIntent {
+            val intent = Intent(context, BatteryWidgetProvider::class.java)
+                .setAction(ACTION_REFRESH)
+            return PendingIntent.getBroadcast(
+                context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
     }
 }
@@ -50,7 +105,6 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
     views.setInt(R.id.capsule_bg, "setBackgroundResource", bg)
 
     if (BatteryWidgetProvider.showChargeHint) {
-        // 充电提示层（仅插入后几秒）
         views.setViewVisibility(R.id.normal_content, View.GONE)
         views.setViewVisibility(R.id.charge_hint, View.VISIBLE)
         val fast = BatteryWidgetProvider.hintFast
@@ -58,7 +112,6 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
         views.setTextViewText(R.id.charge_title, if (fast) "快充模式" else "充电中")
         views.setFloat(R.id.charge_hint, "setAlpha", BatteryWidgetProvider.hintAlpha)
     } else {
-        // 正常电量显示
         views.setViewVisibility(R.id.normal_content, View.VISIBLE)
         views.setViewVisibility(R.id.charge_hint, View.GONE)
 

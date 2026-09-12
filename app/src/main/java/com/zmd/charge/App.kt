@@ -81,6 +81,8 @@ class App : Application() {
             addAction(Intent.ACTION_POWER_DISCONNECTED)
         }
         registerReceiver(batteryReceiver, filter)
+        // 兜底：即使进程被杀，也靠周期闹钟唤醒刷新组件（最多 1 分钟延迟）
+        BatteryWidgetProvider.scheduleRefresh(this)
     }
 
     private fun startHint(context: Context) {

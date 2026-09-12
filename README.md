@@ -9,7 +9,7 @@
 
 ## 下载 APK
 
-- **v1.0.1**（字体子集化，约 3.2MB）：[release/zmd-charge-v1.0.1.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.1.apk)
+- **v1.0.2**（字体子集化，约 3.2MB）：[release/zmd-charge-v1.0.2.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.2.apk)
 
 > 说明：APK 内嵌 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），外观与完整字体一致，体积从约 20MB 降到 3MB。
 
