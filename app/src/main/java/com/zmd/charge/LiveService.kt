@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import com.zmd.charge.log.LogFile
 import com.zmd.charge.settings.SettingsActivity
 import com.zmd.charge.widget.BatteryWidgetProvider
 
@@ -37,16 +38,27 @@ class LiveService : Service() {
             .setOnlyAlertOnce(true)
             .setContentIntent(pi)
             .build()
-        if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        } else {
-            startForeground(NOTIF_ID, notif)
+        try {
+            if (Build.VERSION.SDK_INT >= 34) {
+                startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            } else {
+                startForeground(NOTIF_ID, notif)
+            }
+            LogFile.i("Service", "前台服务已启动（静默通知）")
+        } catch (t: Throwable) {
+            LogFile.e("Service", "startForeground 失败", t)
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        LogFile.i("Service", "onStartCommand flags=" + flags)
         BatteryWidgetProvider.refresh(this)
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        LogFile.i("Service", "前台服务已停止")
+        super.onDestroy()
     }
 
     private fun createChannel() {

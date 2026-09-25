@@ -28,6 +28,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".log.LogActivity"
+            android:exported="false"
+            android:label="@string/log_title"
+            android:parentActivityName=".settings.SettingsActivity"/>
+
         <receiver
             android:name=".widget.BatteryWidgetProvider"
             android:exported="true"

@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.zmd.charge.R
+import com.zmd.charge.log.LogFile
 import com.zmd.charge.settings.Prefs
 import com.zmd.charge.settings.SettingsActivity
 
@@ -86,6 +87,7 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             if (SystemClock.elapsedRealtime() - hintStartedAt > HINT_DURATION_MS + 1500L) {
                 showChargeHint = false
                 hintBright = true
+                LogFile.i("Widget", "充电提示帧超时未收回，已自愈回正常显示")
             }
         }
 
@@ -140,10 +142,12 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
     try {
         mgr.updateAppWidget(id, buildViews(context))
     } catch (t: Throwable) {
-        android.util.Log.w("ZmdCharge", "renderWidget failed, fallback", t)
+        LogFile.e("Widget", "渲染组件失败 id=" + id + "，已降级为兜底布局", t)
         try {
             mgr.updateAppWidget(id, buildSafeViews(context))
-        } catch (_: Throwable) {}
+        } catch (t2: Throwable) {
+            LogFile.e("Widget", "兜底布局也失败 id=" + id, t2)
+        }
     }
 }
 
@@ -217,6 +221,12 @@ private fun buildViews(context: Context): RemoteViews {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     views.setOnClickPendingIntent(R.id.widget_root, pi)
+
+    LogFile.i("Widget", "渲染 " + (if (BatteryWidgetProvider.showChargeHint)
+        "提示帧(" + (if (BatteryWidgetProvider.hintBright) "亮" else "暗") +
+                " 快充=" + BatteryWidgetProvider.hintFast + ")"
+    else "正常显示") + " " + snap.percent + "% 充电中=" + snap.charging +
+            " " + snap.remainingMah + "/" + snap.designMah + "mAh")
 
     return views
 }

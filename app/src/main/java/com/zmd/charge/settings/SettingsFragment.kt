@@ -19,6 +19,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.zmd.charge.LiveService
 import com.zmd.charge.R
+import com.zmd.charge.log.LogActivity
+import com.zmd.charge.log.LogFile
 import com.zmd.charge.widget.BatteryWidgetProvider
 
 class SettingsFragment : PreferenceFragmentCompat(),
@@ -47,6 +49,13 @@ class SettingsFragment : PreferenceFragmentCompat(),
             true
         }
 
+        findPreference<Preference>("open_log")?.setOnPreferenceClickListener {
+            try {
+                startActivity(Intent(requireContext(), LogActivity::class.java))
+            } catch (_: Throwable) {}
+            true
+        }
+
         runUpdateCheck(manual = false)
         updateRuntimeSummary()
     }
@@ -55,6 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         super.onResume()
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         updateRuntimeSummary()
+        findPreference<Preference>("open_log")?.summary = LogFile.summary()
     }
 
     override fun onPause() {
@@ -63,6 +73,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
     }
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
+        LogFile.i("Settings", "设置变更 key=" + key)
         BatteryWidgetProvider.refresh(requireContext())
     }
 

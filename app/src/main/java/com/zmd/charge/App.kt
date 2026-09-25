@@ -9,6 +9,8 @@ import android.os.BatteryManager
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import com.zmd.charge.log.LogFile
+import com.zmd.charge.widget.BatteryData
 import com.zmd.charge.widget.BatteryWidgetProvider
 
 /**
@@ -24,6 +26,8 @@ class App : Application() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var hintActive = false
+    private var lastPercent = -1
+    private var lastCharging: Boolean? = null
     /** goAsync 保住进程，让提示动画跑完（总时长 3.2s，远小于广播接收器超时上限）。 */
     private var pendingResult: BroadcastReceiver.PendingResult? = null
 
@@ -48,20 +52,33 @@ class App : Application() {
                     BatteryWidgetProvider.forceChargingState(true)
                     finishPending()                       // 收掉上一次的，避免 PendingResult 泄漏导致广播超时
                     pendingResult = goAsync()             // 保住进程直到提示动画跑完
+                    LogFile.i("Charge", "POWER_CONNECTED：锁定充电状态并开始提示动画")
                     startHint(context)
                 }
                 Intent.ACTION_POWER_DISCONNECTED -> {
                     BatteryWidgetProvider.forceChargingState(false)
                     endHint(false)
                     BatteryWidgetProvider.refresh(context)
+                    LogFile.i("Charge", "POWER_DISCONNECTED：已锁定未充电并刷新")
                 }
-                else -> BatteryWidgetProvider.refresh(context)
+                else -> {
+                    // 电量广播：只在"电量/充电状态真的变了"时记一行，避免刷屏
+                    val snap = try { BatteryData.read(context, null) } catch (t: Throwable) { null }
+                    if (snap != null && (snap.percent != lastPercent || snap.charging != lastCharging)) {
+                        lastPercent = snap.percent
+                        lastCharging = snap.charging
+                        LogFile.i("Battery", "电量 " + snap.percent + "% 充电中=" + snap.charging +
+                                " 剩余 " + snap.remainingMah + "/" + snap.designMah + " mAh")
+                    }
+                    BatteryWidgetProvider.refresh(context)
+                }
             }
         }
     }
 
     override fun onCreate() {
         super.onCreate()
+        LogFile.init(this)
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_BATTERY_CHANGED)
             addAction(Intent.ACTION_POWER_CONNECTED)
@@ -71,7 +88,7 @@ class App : Application() {
         try {
             registerReceiver(batteryReceiver, filter)
         } catch (t: Throwable) {
-            android.util.Log.w("ZmdCharge", "registerReceiver failed", t)
+            LogFile.e("App", "registerReceiver 失败", t)
         }
         // 兜底：即使进程被杀，也靠周期闹钟唤醒刷新组件（最多 1 分钟延迟）
         BatteryWidgetProvider.scheduleRefresh(this)
@@ -83,6 +100,8 @@ class App : Application() {
         BatteryWidgetProvider.hintStartedAt = SystemClock.elapsedRealtime()
         BatteryWidgetProvider.hintFast = isFastCharge(context)
         BatteryWidgetProvider.hintBright = true
+        LogFile.i("Charge", "提示动画开始 快充=" + BatteryWidgetProvider.hintFast +
+                " 时长=" + BatteryWidgetProvider.HINT_DURATION_MS + "ms")
         handler.removeCallbacks(pulse)
         handler.removeCallbacks(endHintRunnable)
         handler.post(pulse)                 // 立即画第一帧（亮帧）
@@ -98,6 +117,7 @@ class App : Application() {
             BatteryWidgetProvider.showChargeHint = false
             BatteryWidgetProvider.hintBright = true
             if (render) BatteryWidgetProvider.refresh(this)
+            LogFile.i("Charge", "提示动画结束，已回到电量显示")
         }
         finishPending()
     }

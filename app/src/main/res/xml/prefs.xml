@@ -44,6 +44,13 @@
             android:summary="@string/pref_autostart_summary"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_group_diag">
+        <Preference
+            android:key="open_log"
+            android:title="@string/pref_open_log"
+            android:summary="@string/pref_open_log_summary"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_group_about">
         <Preference
             android:key="check_update"
