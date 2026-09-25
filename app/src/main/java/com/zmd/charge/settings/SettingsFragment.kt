@@ -22,6 +22,7 @@ import com.zmd.charge.R
 import com.zmd.charge.log.LogActivity
 import com.zmd.charge.log.LogFile
 import com.zmd.charge.widget.BatteryWidgetProvider
+import com.zmd.charge.widget.WidgetMetrics
 
 class SettingsFragment : PreferenceFragmentCompat(),
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -65,6 +66,8 @@ class SettingsFragment : PreferenceFragmentCompat(),
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         updateRuntimeSummary()
         findPreference<Preference>("open_log")?.summary = LogFile.summary()
+        findPreference<Preference>("widget_columns")?.summary =
+            WidgetMetrics.describe(requireContext()) + " · 桌面实际宽度由桌面决定，可长按组件拖动边缘调整"
     }
 
     override fun onPause() {

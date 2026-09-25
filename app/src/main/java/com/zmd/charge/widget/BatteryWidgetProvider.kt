@@ -140,7 +140,7 @@ class BatteryWidgetProvider : AppWidgetProvider() {
  */
 private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
     try {
-        mgr.updateAppWidget(id, buildViews(context))
+        mgr.updateAppWidget(id, buildViews(context, id))
     } catch (t: Throwable) {
         LogFile.e("Widget", "渲染组件失败 id=" + id + "，已降级为兜底布局", t)
         try {
@@ -159,9 +159,14 @@ private fun buildSafeViews(context: Context): RemoteViews {
     return views
 }
 
-private fun buildViews(context: Context): RemoteViews {
+private fun buildViews(context: Context, id: Int): RemoteViews {
     val snap = BatteryData.read(context, BatteryWidgetProvider.effectiveChargingOverride())
     val views = RemoteViews(context.packageName, R.layout.widget_layout)
+
+    // 横向格数：0 = 读不到（当作"够宽"处理，显示完整信息）
+    val cols = WidgetMetrics.effectiveColumns(context, id)
+    // 窄到 3 格以内时只留 图标 + 百分比 + 进度环，避免容量数字被挤出屏幕
+    val compact = cols in 1..3
 
     val bg = if (Prefs.background(context) == "transparent")
         R.drawable.widget_bg_transparent else R.drawable.widget_bg_capsule
@@ -196,6 +201,10 @@ private fun buildViews(context: Context): RemoteViews {
     } else {
         views.setViewVisibility(R.id.normal_content, View.VISIBLE)
         views.setViewVisibility(R.id.charge_hint, View.GONE)
+        views.setViewVisibility(
+            R.id.capacity_group,
+            if (compact && Prefs.showRemaining(context)) View.GONE else View.VISIBLE
+        )
 
         views.setTextViewText(R.id.txt_percent, snap.percent.toString() + "%")
         views.setImageViewResource(R.id.ring_image, arcRes(context, snap.percent, snap.charging))
@@ -225,7 +234,8 @@ private fun buildViews(context: Context): RemoteViews {
     LogFile.i("Widget", "渲染 " + (if (BatteryWidgetProvider.showChargeHint)
         "提示帧(" + (if (BatteryWidgetProvider.hintBright) "亮" else "暗") +
                 " 快充=" + BatteryWidgetProvider.hintFast + ")"
-    else "正常显示") + " " + snap.percent + "% 充电中=" + snap.charging +
+    else "正常显示") + " 格数=" + cols + (if (compact) "(紧凑)" else "") +
+            " " + snap.percent + "% 充电中=" + snap.charging +
             " " + snap.remainingMah + "/" + snap.designMah + "mAh")
 
     return views

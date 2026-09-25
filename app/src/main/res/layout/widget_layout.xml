@@ -38,6 +38,7 @@
 
             <!-- 容量：现量 / 设置（数字等大）+ mAh -->
             <LinearLayout
+                android:id="@+id/capacity_group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

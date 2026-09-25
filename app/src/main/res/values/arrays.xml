@@ -8,4 +8,22 @@
         <item>solid</item>
         <item>transparent</item>
     </array>
+    <array name="widget_columns_entries">
+        <item>@string/columns_auto</item>
+        <item>@string/columns_1</item>
+        <item>@string/columns_2</item>
+        <item>@string/columns_3</item>
+        <item>@string/columns_4</item>
+        <item>@string/columns_5</item>
+        <item>@string/columns_6</item>
+    </array>
+    <array name="widget_columns_values">
+        <item>auto</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </array>
 </resources>

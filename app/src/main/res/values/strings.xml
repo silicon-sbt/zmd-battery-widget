@@ -12,6 +12,15 @@
     <string name="pref_background">组件背景</string>
     <string name="pref_background_solid">实心深炭</string>
     <string name="pref_background_transparent">透明</string>
+    <string name="pref_widget_columns">组件宽度（格数）</string>
+    <string name="pref_widget_columns_summary">首次添加默认铺满整行；此处可覆盖用于内容自适应</string>
+    <string name="columns_auto">自动（按桌面实测）</string>
+    <string name="columns_1">1 格</string>
+    <string name="columns_2">2 格</string>
+    <string name="columns_3">3 格</string>
+    <string name="columns_4">4 格</string>
+    <string name="columns_5">5 格</string>
+    <string name="columns_6">6 格</string>
     <string name="pref_low_threshold">低电量阈值</string>
     <string name="pref_low_threshold_summary">低于此电量时文字变红</string>
     <string name="charging">充电中</string>
