@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 兜底布局：任何异常时用它，保证组件永远不会变成"加载窗口小工具时出现问题"。
+     刻意只用系统字体 + 纯文本，不含自定义字体/图片/反射动作。 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_capsule">
+
+    <TextView
+        android:id="@+id/safe_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="16sp"
+        android:textColor="@color/text_primary"
+        android:text="--%"/>
+</FrameLayout>

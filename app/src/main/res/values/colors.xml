@@ -10,4 +10,7 @@
     <color name="text_tertiary">#66FFFFFF</color>
     <color name="badge_dark">#262425</color>
     <color name="track_dark">#4A4849</color>
+    <!-- 充电提示脉冲用的"暗帧"（按胶囊底色 #312F30 混合 55% 得到，替代 alpha 动画） -->
+    <color name="accent_yellow_green_dim">#74753C</color>
+    <color name="text_primary_dim">#888888</color>
 </resources>

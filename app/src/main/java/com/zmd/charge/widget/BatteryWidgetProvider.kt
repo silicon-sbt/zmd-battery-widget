@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -45,15 +46,21 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         /** 周期刷新间隔；系统对 setRepeating 的下限约 60s。 */
         private const val REFRESH_INTERVAL_MS = 60_000L
 
-        /** 是否正在显示"插入充电提示动画"（仅插入后几秒内为 true）。 */
+        /** 插电提示动画总时长。 */
+        const val HINT_DURATION_MS = 3200L
+
+        /** 是否正在显示"插入充电提示"（仅插入后几秒内为 true）。 */
         @JvmStatic
         var showChargeHint: Boolean = false
         /** true=快充，false=普通充电。 */
         @JvmStatic
         var hintFast: Boolean = false
-        /** 充电提示的透明度(0..1)，用于淡入/淡出过渡动画。 */
+        /** 当前脉冲帧：true=亮帧，false=暗帧。 */
         @JvmStatic
-        var hintAlpha: Float = 1f
+        var hintBright: Boolean = true
+        /** 提示开始时刻（elapsedRealtime），用于超时自愈。 */
+        @JvmStatic
+        var hintStartedAt: Long = 0L
 
         /** 插拔电后强制锁定的充电状态（避免被滞后的 sticky 广播覆盖）；带有效期。 */
         @JvmStatic
@@ -63,15 +70,28 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         /** 插拔电瞬间锁定充电状态若干毫秒，保证绿环/黄绿环立即、稳定地切换。 */
         fun forceChargingState(value: Boolean, durationMs: Long = 5000L) {
             forcedCharging = value
-            forcedUntil = android.os.SystemClock.elapsedRealtime() + durationMs
+            forcedUntil = SystemClock.elapsedRealtime() + durationMs
         }
 
         /** 当前生效的充电状态覆盖（过期返回 null）。 */
         fun effectiveChargingOverride(): Boolean? =
-            if (android.os.SystemClock.elapsedRealtime() < forcedUntil) forcedCharging else null
+            if (SystemClock.elapsedRealtime() < forcedUntil) forcedCharging else null
+
+        /**
+         * 自愈：提示只允许存在 HINT_DURATION_MS。若动画因进程被杀等原因没跑完，
+         * 下一次刷新（电量广播/周期闹钟）会把组件强制拉回正常显示，绝不长期停在提示帧。
+         */
+        private fun healHint() {
+            if (!showChargeHint) return
+            if (SystemClock.elapsedRealtime() - hintStartedAt > HINT_DURATION_MS + 1500L) {
+                showChargeHint = false
+                hintBright = true
+            }
+        }
 
         /** 刷新所有已放置的组件实例（设置页变更/电量变化/闹钟触发时调用）。 */
         fun refresh(context: Context) {
+            healHint()
             val mgr = AppWidgetManager.getInstance(context)
             val ids = mgr.getAppWidgetIds(
                 ComponentName(context, BatteryWidgetProvider::class.java)
@@ -111,7 +131,31 @@ class BatteryWidgetProvider : AppWidgetProvider() {
     }
 }
 
+/**
+ * 渲染单个组件实例。
+ * 双层保护：先尝试正常渲染，任何异常都退回到"极简兜底布局"，
+ * 确保桌面端永远不会出现"加载窗口小工具时出现问题"。
+ */
 private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
+    try {
+        mgr.updateAppWidget(id, buildViews(context))
+    } catch (t: Throwable) {
+        android.util.Log.w("ZmdCharge", "renderWidget failed, fallback", t)
+        try {
+            mgr.updateAppWidget(id, buildSafeViews(context))
+        } catch (_: Throwable) {}
+    }
+}
+
+/** 极简兜底：不含自定义字体/图片/自定义 drawable，只显示电量百分比。 */
+private fun buildSafeViews(context: Context): RemoteViews {
+    val views = RemoteViews(context.packageName, R.layout.widget_layout_safe)
+    val percent = try { BatteryData.read(context, null).percent } catch (t: Throwable) { -1 }
+    views.setTextViewText(R.id.safe_text, if (percent < 0) "--%" else percent.toString() + "%")
+    return views
+}
+
+private fun buildViews(context: Context): RemoteViews {
     val snap = BatteryData.read(context, BatteryWidgetProvider.effectiveChargingOverride())
     val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
@@ -120,12 +164,31 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
     views.setInt(R.id.capsule_bg, "setBackgroundResource", bg)
 
     if (BatteryWidgetProvider.showChargeHint) {
+        // 充电提示：亮帧/暗帧交替脉冲（全部是静态资源，不使用 alpha/setFloat 反射动作）
         views.setViewVisibility(R.id.normal_content, View.GONE)
         views.setViewVisibility(R.id.charge_hint, View.VISIBLE)
         val fast = BatteryWidgetProvider.hintFast
+        val bright = BatteryWidgetProvider.hintBright
         views.setTextViewText(R.id.charge_sub, if (fast) "/// SUPER CHARGE" else "/// CHARGING")
         views.setTextViewText(R.id.charge_title, if (fast) "快充模式" else "充电中")
-        views.setFloat(R.id.charge_hint, "setAlpha", BatteryWidgetProvider.hintAlpha)
+        views.setImageViewResource(
+            R.id.charge_logo,
+            if (bright) R.drawable.ic_bolt_glow else R.drawable.ic_bolt_glow_dim
+        )
+        views.setTextColor(
+            R.id.charge_sub,
+            ContextCompat.getColor(
+                context,
+                if (bright) R.color.accent_yellow_green else R.color.accent_yellow_green_dim
+            )
+        )
+        views.setTextColor(
+            R.id.charge_title,
+            ContextCompat.getColor(
+                context,
+                if (bright) R.color.text_primary else R.color.text_primary_dim
+            )
+        )
     } else {
         views.setViewVisibility(R.id.normal_content, View.VISIBLE)
         views.setViewVisibility(R.id.charge_hint, View.GONE)
@@ -138,14 +201,14 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
         val threshold = Prefs.lowThreshold(context)
         val isLow = snap.percent < threshold
         views.setTextColor(R.id.txt_percent,
-            if (isLow) ContextCompat.getColor(context, R.color.accent_red)
-            else ContextCompat.getColor(context, R.color.text_primary))
+            ContextCompat.getColor(context,
+                if (isLow) R.color.accent_red else R.color.text_primary))
         views.setTextColor(R.id.txt_remaining,
-            if (isLow) ContextCompat.getColor(context, R.color.accent_red)
-            else ContextCompat.getColor(context, R.color.text_primary))
+            ContextCompat.getColor(context,
+                if (isLow) R.color.accent_red else R.color.text_primary))
         views.setTextColor(R.id.txt_max,
-            if (isLow) ContextCompat.getColor(context, R.color.accent_red)
-            else ContextCompat.getColor(context, R.color.text_secondary))
+            ContextCompat.getColor(context,
+                if (isLow) R.color.accent_red else R.color.text_secondary))
     }
 
     val pi = PendingIntent.getActivity(
@@ -155,12 +218,18 @@ private fun renderWidget(context: Context, mgr: AppWidgetManager, id: Int) {
     )
     views.setOnClickPendingIntent(R.id.widget_root, pi)
 
-    mgr.updateAppWidget(id, views)
+    return views
 }
 
-/** 电量百分比 -> 预渲染进度环 PNG 资源。按最近 5% 取档；充电时用绿色环(arcg_)，否则黄绿环(arc_)。 */
+/**
+ * 电量百分比 -> 预渲染进度环 PNG 资源。按最近 5% 取档；充电时用绿色环(arcg_)，否则黄绿环(arc)。
+ * 取不到时回退到 100% 档，绝不返回 0（返回 0 会让桌面端 getDrawable(0) 抛异常，
+ * 整个组件直接变成"加载窗口小工具时出现问题"）。
+ */
 private fun arcRes(context: Context, percent: Int, charging: Boolean): Int {
     val level = (((percent + 2) / 5) * 5).coerceIn(0, 100)
     val prefix = if (charging) "arcg_%02d" else "arc_%02d"
-    return context.resources.getIdentifier(prefix.format(level), "drawable", context.packageName)
+    val found = context.resources.getIdentifier(prefix.format(level), "drawable", context.packageName)
+    if (found != 0) return found
+    return if (charging) R.drawable.arcg_100 else R.drawable.arc_100
 }

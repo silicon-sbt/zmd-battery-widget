@@ -7,3 +7,4 @@ local.properties
 app/build/
 .DS_Store
 app/src/main/res/font/
+.tools/
