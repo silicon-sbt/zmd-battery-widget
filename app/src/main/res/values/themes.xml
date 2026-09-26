@@ -12,7 +12,7 @@
     </style>
 
     <!-- 日志页顶部的胶囊小按钮 -->
-    <style name="LogChip" parent="">
+    <style name="LogChip">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">6dp</item>

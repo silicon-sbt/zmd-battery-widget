@@ -73,6 +73,23 @@ object WidgetMetrics {
         return (w / DP_PER_CELL).roundToInt().coerceIn(1, 8)
     }
 
+    /**
+     * 内容是否进紧凑模式（收掉 mAh 数字）。
+     * 判断依据是【实测宽度】而不是格数估算 —— 格数估算在部分桌面上不准，
+     * 会把本来够宽的组件误判成窄屏、把数字藏掉（v1.0.3 的实际问题）。
+     * 读不到宽度时一律按"够宽"处理，保持完整显示。
+     */
+    fun isCompact(context: Context, id: Int): Boolean {
+        val forced = Prefs.widgetColumns(context)
+        if (forced > 0) return forced <= 2          // 手动指定 1~2 格 = 强制紧凑
+        val w = widthDp(context, id)
+        if (w <= 0f) return false
+        return w < COMPACT_WIDTH_DP
+    }
+
+    /** 完整显示（图标+容量+百分比+环）所需的最小宽度。低于它就放不下 mAh 数字。 */
+    private const val COMPACT_WIDTH_DP = 260f
+
     /** 最终生效格数：用户设置优先 -> 尺寸列表精算 -> 宽度粗估 -> 0（未知）。 */
     fun effectiveColumns(context: Context, id: Int): Int {
         val forced = Prefs.widgetColumns(context)
@@ -91,6 +108,7 @@ object WidgetMetrics {
         val byWidth = columnsByWidth(context, id)
         val cols = if (precise > 0) precise else byWidth
         val how = if (precise > 0) "系统尺寸列表" else "宽度估算"
-        return "桌面实测：" + cols + " 格 · 宽 " + w + "dp（" + how + "）"
+        val mode = if (isCompact(context, id)) "紧凑" else "完整"
+        return "桌面实测：宽 " + w + "dp，约 " + cols + " 格（" + how + "）· 当前" + mode + "显示"
     }
 }

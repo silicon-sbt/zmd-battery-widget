@@ -15,8 +15,8 @@
     <string name="pref_widget_columns">组件宽度（格数）</string>
     <string name="pref_widget_columns_summary">首次添加默认铺满整行；此处可覆盖用于内容自适应</string>
     <string name="columns_auto">自动（按桌面实测）</string>
-    <string name="columns_1">1 格</string>
-    <string name="columns_2">2 格</string>
+    <string name="columns_1">1 格（强制紧凑）</string>
+    <string name="columns_2">2 格（强制紧凑）</string>
     <string name="columns_3">3 格</string>
     <string name="columns_4">4 格</string>
     <string name="columns_5">5 格</string>

@@ -17,13 +17,16 @@
         <item>@string/columns_5</item>
         <item>@string/columns_6</item>
     </array>
+    <!-- 值必须是非纯数字字符串！
+         AAPT2 会把 <item>1</item> 编译成整数，Resources.getTextArray() 对整数项返回 null，
+         ListPreference.findIndexOfValue() 拿它调 toString() 直接 NPE —— v1.0.3 设置页闪退就是这个。 -->
     <array name="widget_columns_values">
         <item>auto</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
+        <item>col1</item>
+        <item>col2</item>
+        <item>col3</item>
+        <item>col4</item>
+        <item>col5</item>
+        <item>col6</item>
     </array>
 </resources>

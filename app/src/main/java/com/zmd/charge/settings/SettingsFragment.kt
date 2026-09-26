@@ -65,9 +65,18 @@ class SettingsFragment : PreferenceFragmentCompat(),
         super.onResume()
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
         updateRuntimeSummary()
-        findPreference<Preference>("open_log")?.summary = LogFile.summary()
-        findPreference<Preference>("widget_columns")?.summary =
-            WidgetMetrics.describe(requireContext()) + " · 桌面实际宽度由桌面决定，可长按组件拖动边缘调整"
+        // 摘要只是锦上添花，任何异常都不该让设置页崩掉
+        try {
+            findPreference<Preference>("open_log")?.summary = LogFile.summary()
+        } catch (t: Throwable) {
+            LogFile.e("Settings", "更新日志摘要失败", t)
+        }
+        try {
+            findPreference<Preference>("widget_columns")?.summary =
+                WidgetMetrics.describe(requireContext()) + " · 桌面实际宽度由桌面决定，可长按组件拖动边缘调整"
+        } catch (t: Throwable) {
+            LogFile.e("Settings", "更新宽度摘要失败", t)
+        }
     }
 
     override fun onPause() {

@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import kotlin.math.roundToInt
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -163,10 +164,10 @@ private fun buildViews(context: Context, id: Int): RemoteViews {
     val snap = BatteryData.read(context, BatteryWidgetProvider.effectiveChargingOverride())
     val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-    // 横向格数：0 = 读不到（当作"够宽"处理，显示完整信息）
+    // 显示模式按【实测宽度】决定（不是格数估算，估算在部分桌面会误判把数字藏掉）
     val cols = WidgetMetrics.effectiveColumns(context, id)
-    // 窄到 3 格以内时只留 图标 + 百分比 + 进度环，避免容量数字被挤出屏幕
-    val compact = cols in 1..3
+    val widthDp = WidgetMetrics.widthDp(context, id).roundToInt()
+    val compact = WidgetMetrics.isCompact(context, id)
 
     val bg = if (Prefs.background(context) == "transparent")
         R.drawable.widget_bg_transparent else R.drawable.widget_bg_capsule
@@ -201,9 +202,10 @@ private fun buildViews(context: Context, id: Int): RemoteViews {
     } else {
         views.setViewVisibility(R.id.normal_content, View.VISIBLE)
         views.setViewVisibility(R.id.charge_hint, View.GONE)
+        // 「显示剩余容量」开关真正生效：关掉、或窄到放不下时才收起来
         views.setViewVisibility(
             R.id.capacity_group,
-            if (compact && Prefs.showRemaining(context)) View.GONE else View.VISIBLE
+            if (Prefs.showRemaining(context) && !compact) View.VISIBLE else View.GONE
         )
 
         views.setTextViewText(R.id.txt_percent, snap.percent.toString() + "%")
@@ -234,7 +236,7 @@ private fun buildViews(context: Context, id: Int): RemoteViews {
     LogFile.i("Widget", "渲染 " + (if (BatteryWidgetProvider.showChargeHint)
         "提示帧(" + (if (BatteryWidgetProvider.hintBright) "亮" else "暗") +
                 " 快充=" + BatteryWidgetProvider.hintFast + ")"
-    else "正常显示") + " 格数=" + cols + (if (compact) "(紧凑)" else "") +
+    else "正常显示") + " 宽=" + widthDp + "dp 格数=" + cols + (if (compact) "(紧凑)" else "") +
             " " + snap.percent + "% 充电中=" + snap.charging +
             " " + snap.remainingMah + "/" + snap.designMah + "mAh")
 
