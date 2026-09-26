@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   尺寸策略：
-   - minWidth=600dp / minHeight=60dp：老桌面按 dp 换算格数时，600dp 会顶满任何手机的一整行 -> 首次添加即 1×N（N=桌面横排格数）。
-   - targetCellWidth=6 / targetCellHeight=1：Android 12+ 直接按"格"指定，桌面会用它自己的列数截断，同样得到 1×N 铺满。
-   - minResizeWidth=160dp：允许用户长按拖动边缘把它改窄（约 2 格起）。
+   - minWidth=600dp：老桌面按 dp 换算格数时，600dp 会顶满任何手机的一整行 -> 首次添加即 1×N（N=桌面横排格数）。
+   - minHeight 保持很小(40dp)：有些桌面的格子高度只有 50~60dp，
+     之前写 60dp 会被 ceil() 算成 **2 行**（用户反馈"显示成高两格"就是这个原因）。
+     40dp 在任何常见桌面上都只会落成 1 行。
+   - targetCellWidth=5 / targetCellHeight=1：Android 12+ 直接按"格"指定，桌面按自己的列数截断；
+     故意不写 6，避免个别国产桌面因"目标宽度超过自己的列数"做出奇怪的补位。
+   - resizeMode 带 vertical：万一某些桌面仍然放成 2 行，用户可以自己拖回 1 行。
+   - minResize* 放小：允许拖窄到约 2 格 / 拖矮到 1 行。
    Android 不开放"桌面列数"和"程序化改组件尺寸"的 API，实际格数由桌面决定，App 只能给默认值 + 运行时测量。
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="600dp"
-    android:minHeight="60dp"
-    android:targetCellWidth="6"
+    android:minHeight="40dp"
+    android:targetCellWidth="5"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
     android:minResizeWidth="160dp"
-    android:minResizeHeight="60dp"
-    android:resizeMode="horizontal"
+    android:minResizeHeight="40dp"
+    android:resizeMode="horizontal|vertical"
     android:initialLayout="@layout/widget_layout"
     android:widgetCategory="home_screen"
     android:description="@string/widget_desc"

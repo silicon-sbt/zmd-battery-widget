@@ -238,7 +238,8 @@ private fun buildViews(context: Context, id: Int): RemoteViews {
                 " 快充=" + BatteryWidgetProvider.hintFast + ")"
     else "正常显示") + " 宽=" + widthDp + "dp 格数=" + cols + (if (compact) "(紧凑)" else "") +
             " " + snap.percent + "% 充电中=" + snap.charging +
-            " " + snap.remainingMah + "/" + snap.designMah + "mAh")
+            " " + snap.remainingMah + "/" + snap.designMah + "mAh 容量表=" +
+            (DeviceCapacity.matchedKey() ?: "未命中(用兜底值)"))
 
     return views
 }
