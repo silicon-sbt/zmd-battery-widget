@@ -9,6 +9,20 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <item name="android:textColorHint">@color/text_tertiary</item>
+        <!-- 关键：App 主题里 textColorPrimary 是白色，若不给弹窗指定深色弹窗主题，
+             DayNight 浅色弹窗背景 + 白字 = 白字白底看不见（用户反馈的"弹窗说明没显示/是白的"） -->
+        <item name="alertDialogTheme">@style/Theme.ZmdCharge.Dialog</item>
+        <item name="android:alertDialogTheme">@style/Theme.ZmdCharge.Dialog</item>
+    </style>
+
+    <!-- 弹窗：固定深色底 + 白字 + 黄绿按钮，和 App 整体风格一致 -->
+    <style name="Theme.ZmdCharge.Dialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorAccent">@color/accent_yellow_green</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorTertiary">@color/text_tertiary</item>
+        <item name="android:windowBackground">@drawable/dialog_panel</item>
+        <item name="android:colorBackground">@color/bg_capsule</item>
     </style>
 
     <!-- 日志页顶部的胶囊小按钮 -->
