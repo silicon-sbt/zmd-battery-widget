@@ -27,6 +27,11 @@
             android:defaultValue="20"
             android:min="5"
             android:max="40"/>
+        <SwitchPreference
+            android:key="force_capacity"
+            android:title="@string/pref_force_capacity"
+            android:summary="@string/pref_force_capacity_summary"
+            android:defaultValue="false"/>
         <EditTextPreference
             android:key="capacity_fallback"
             android:title="@string/pref_capacity_fallback"

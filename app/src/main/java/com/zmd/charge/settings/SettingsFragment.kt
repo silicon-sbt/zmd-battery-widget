@@ -22,6 +22,7 @@ import com.zmd.charge.R
 import com.zmd.charge.log.LogActivity
 import com.zmd.charge.log.LogFile
 import com.zmd.charge.widget.BatteryWidgetProvider
+import com.zmd.charge.widget.DeviceCapacity
 import com.zmd.charge.widget.WidgetMetrics
 
 class SettingsFragment : PreferenceFragmentCompat(),
@@ -47,6 +48,23 @@ class SettingsFragment : PreferenceFragmentCompat(),
         }
         findPreference<SwitchPreference>("live_service")?.setOnPreferenceChangeListener { _, newValue ->
             setLiveService(newValue as Boolean)
+            true
+        }
+
+        // 用户一旦手填标称容量，就自动切到"手填优先"——不用再自己去开开关
+        findPreference<Preference>("capacity_fallback")?.setOnPreferenceChangeListener { _, newValue ->
+            val v = (newValue as? String)?.trim().orEmpty().toIntOrNull()
+            if (v != null && v in 500..30000) {
+                try {
+                    preferenceManager.sharedPreferences
+                        ?.edit()?.putBoolean("force_capacity", true)?.apply()
+                    (findPreference<Preference>("force_capacity") as? SwitchPreference)?.isChecked = true
+                    LogFile.i("Settings", "手填容量 " + v + " mAh，已自动切换为手填优先")
+                    Toast.makeText(requireContext(), "已改用你填的 " + v + " mAh", Toast.LENGTH_SHORT).show()
+                } catch (t: Throwable) {
+                    LogFile.e("Settings", "切换手填优先失败", t)
+                }
+            }
             true
         }
 
@@ -77,6 +95,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         } catch (t: Throwable) {
             LogFile.e("Settings", "更新宽度摘要失败", t)
         }
+        updateCapacitySummary()
     }
 
     override fun onPause() {
@@ -86,6 +105,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
         LogFile.i("Settings", "设置变更 key=" + key)
+        updateCapacitySummary()
         BatteryWidgetProvider.refresh(requireContext())
     }
 
@@ -116,6 +136,18 @@ class SettingsFragment : PreferenceFragmentCompat(),
             try {
                 startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
             } catch (_: Exception) {}
+        }
+    }
+
+    /** 容量摘要：直接告诉用户"当前生效多少 mAh、依据是什么"，避免机型被识别错时一头雾水。 */
+    private fun updateCapacitySummary() {
+        val ctx = context ?: return
+        try {
+            val eff = DeviceCapacity.lookup(ctx)
+            findPreference<Preference>("capacity_fallback")?.summary =
+                "当前生效 " + eff + " mAh · 依据：" + DeviceCapacity.source(ctx)
+        } catch (t: Throwable) {
+            LogFile.e("Settings", "更新容量摘要失败", t)
         }
     }
 

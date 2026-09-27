@@ -25,6 +25,10 @@ object Prefs {
         return digits.toIntOrNull()?.coerceIn(0, 8) ?: 0
     }
 
+    /** true=忽略内置容量表，强制使用手填容量（机型被表误判时的逃生口）。 */
+    fun forceCapacity(c: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(c).getBoolean("force_capacity", false)
+
     fun capacityFallback(c: Context): Int =
         PreferenceManager.getDefaultSharedPreferences(c).getString("capacity_fallback", "5500")
             ?.toIntOrNull() ?: 5500

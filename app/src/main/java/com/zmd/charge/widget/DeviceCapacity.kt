@@ -70,7 +70,7 @@ object DeviceCapacity {
         "y21" to 5000, "y20" to 5000,
         // ---- NEX / X Fold / X Flip ----
         "x fold3 pro" to 5700, "x fold3" to 5500, "x fold2" to 4800, "x fold" to 4600,
-        "x flip" to 4400, "nex 3" to 4500, "nex" to 4000,
+        "x flip" to 4400, "vivo nex 3" to 4500, "vivo nex" to 4000,
 
         // ================= 华为 =================
         "mate 60 pro+" to 5000, "mate 60 pro" to 5000, "mate 60" to 4750,
@@ -172,11 +172,11 @@ object DeviceCapacity {
         "pixel 3a" to 3000, "pixel 3" to 2915, "pixel 2" to 2700, "pixel" to 2770,
 
         // ================= 小米 / 红米 / POCO =================
-        "14 ultra" to 5300, "14 pro" to 4880, "xiaomi 14" to 4610,
-        "13 ultra" to 5000, "13 pro" to 4820, "xiaomi 13" to 4500,
-        "12s ultra" to 4860, "12s pro" to 4600, "12s" to 4500,
-        "12 pro" to 4600, "xiaomi 12" to 4500,
-        "11 ultra" to 5000, "mi 11" to 4600, "mi 10" to 4780, "mi 9" to 3300,
+        "xiaomi 14 ultra" to 5300, "xiaomi 14 pro" to 4880, "xiaomi 14" to 4610,
+        "xiaomi 13 ultra" to 5000, "xiaomi 13 pro" to 4820, "xiaomi 13" to 4500,
+        "xiaomi 12s ultra" to 4860, "xiaomi 12s pro" to 4600, "xiaomi 12s" to 4500,
+        "xiaomi 12 pro" to 4600, "xiaomi 12" to 4500,
+        "xiaomi 11 ultra" to 5000, "mi 11" to 4600, "mi 10" to 4780, "mi 9" to 3300,
         "mix fold 3" to 4800, "mix fold 2" to 4500, "mix fold" to 5020,
         "mix 4" to 4500, "mix 3" to 3200,
         "civi 4" to 4700, "civi 3" to 4500, "civi 2" to 4500, "civi" to 4500,
@@ -216,6 +216,8 @@ object DeviceCapacity {
         "oneplus 10 pro" to 5000, "oneplus 10t" to 4800, "oneplus 9 pro" to 4500,
         "oneplus 9" to 4500, "oneplus 8t" to 4500, "oneplus 8" to 4300,
         "oneplus 7t" to 3800, "oneplus 7" to 3700, "oneplus 6t" to 3700,
+        "oneplus turbo 6" to 9000, "oneplus turbo 5" to 8000, "plu110" to 9000,
+        "oneplus ace 6 pro" to 7800, "oneplus ace 6" to 7800,
         "oneplus ace 3 pro" to 6100, "oneplus ace 3" to 5500, "oneplus ace 2" to 5000,
         "oneplus ace" to 4500, "oneplus nord 4" to 5500, "oneplus nord 3" to 5000,
         "oneplus nord 2" to 4500, "oneplus nord" to 4115,
@@ -267,16 +269,67 @@ object DeviceCapacity {
         "fairphone 5" to 4200, "fairphone 4" to 3905,
     )
 
+    /** 去空格匹配的最小键长度：低于它的键（如 "u1"）只允许做 token 匹配，否则会误命中 "PLU110" 这类机型代码。 */
+    private const val MIN_LOOSE_KEY_LEN = 6
+
     fun lookup(context: Context): Int {
-        val hay = (Build.MODEL.orEmpty() + " | " + Build.DEVICE.orEmpty() + " | " +
-                Build.PRODUCT.orEmpty()).lowercase()
+        // 用户显式选择"强制手填"时，跳过查表
+        if (Prefs.forceCapacity(context)) return Prefs.capacityFallback(context)
+        return matchKey()?.let { (_, cap) -> cap } ?: Prefs.capacityFallback(context)
+    }
+
+    /** 当前生效容量的来源说明，给设置页摘要和日志用。 */
+    fun source(context: Context): String {
+        if (Prefs.forceCapacity(context)) return "手填（强制）"
+        val hit = matchKey()
+        return if (hit != null) "容量表:" + hit.first else "兜底值（表未命中）"
+    }
+
+    private fun haystack(): String =
+        (Build.MODEL.orEmpty() + " | " + Build.DEVICE.orEmpty() + " | " +
+                Build.PRODUCT.orEmpty() + " | " + Build.MANUFACTURER.orEmpty() + " | " +
+                Build.BRAND.orEmpty()).lowercase()
+
+    /** 返回命中的 (键, 容量)；未命中返回 null。 */
+    private fun matchKey(): Pair<String, Int>? {
+        val hay = haystack()
         val compact = squash(hay)
-        for ((key, cap) in TABLE) {
-            if (hay.contains(key)) return cap
+        for (entry in TABLE) {
+            val key = entry.first
+            // ① token 匹配：键必须从"词的边界"开始（前面是开头或非字母数字）。
+            //    这样 "u1" 不会命中 "plu110"，但 "sm-s928" 仍能命中 "sm-s928b"。
+            if (matchesTokenPrefix(hay, key)) return entry
+            // ② 去掉空格/横线的松散匹配：只对足够长的键生效，避免短键误伤机型代码。
             val k = squash(key)
-            if (k.isNotEmpty() && compact.contains(k)) return cap
+            if (k.length >= MIN_LOOSE_KEY_LEN && compact.contains(k)) return entry
         }
-        return Prefs.capacityFallback(context)
+        return null
+    }
+
+    /**
+     * 短键（<4 字符）的危险性：像 "u1" 会命中机型代码 "PLU110"，"x9" 会命中 "SM-X910"。
+     * 所以短键只允许紧跟在【字符串开头 / 空格 / 字段分隔符】之后，即必须是一个独立的"词"。
+     * 长键（≥4，如 "sm-s928"）仍用宽松边界，这样它才能命中 "SM-S928B" 这种带后缀的代码。
+     */
+    private const val SHORT_KEY_LEN = 4
+
+    /** key 是否作为"某个词的起始片段"出现在 hay 中。 */
+    private fun matchesTokenPrefix(hay: String, key: String): Boolean {
+        val strict = key.length < SHORT_KEY_LEN
+        var from = 0
+        while (true) {
+            val i = hay.indexOf(key, from)
+            if (i < 0) return false
+            if (i == 0) return true
+            val prev = hay[i - 1]
+            val ok = if (strict) {
+                prev == ' ' || prev == '|' || prev == '(' || prev == '/' || prev == ','
+            } else {
+                !prev.isLetterOrDigit()
+            }
+            if (ok) return true
+            from = i + 1
+        }
     }
 
     /** 去掉空格/横线/下划线，便于 "Pixel 8 Pro" 与 "pixel8pro"、"SM-S928B" 与 "sms928b" 互相匹配。 */
@@ -289,17 +342,7 @@ object DeviceCapacity {
     }
 
     /** 仅供调试/日志：返回命中的键名，未命中返回 null。 */
-    fun matchedKey(): String? {
-        val hay = (Build.MODEL.orEmpty() + " | " + Build.DEVICE.orEmpty() + " | " +
-                Build.PRODUCT.orEmpty()).lowercase()
-        val compact = squash(hay)
-        for ((key, _) in TABLE) {
-            if (hay.contains(key)) return key
-            val k = squash(key)
-            if (k.isNotEmpty() && compact.contains(k)) return key
-        }
-        return null
-    }
+    fun matchedKey(): String? = matchKey()?.first
 
     val size: Int get() = TABLE.size
 }

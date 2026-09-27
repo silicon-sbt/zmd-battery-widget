@@ -5,8 +5,10 @@
     <string name="widget_desc">终末地风格 电量/容量 显示</string>
     <string name="settings_title">设置</string>
     <string name="pref_group_display">显示</string>
-    <string name="pref_capacity_fallback">容量表兜底值 (mAh)</string>
-    <string name="pref_capacity_fallback_summary">表里没有你的机型时使用的标称容量</string>
+    <string name="pref_force_capacity">强制使用手填容量</string>
+    <string name="pref_force_capacity_summary">手填容量后会自动开启；开启即忽略内置容量表，始终用下面的数值</string>
+    <string name="pref_capacity_fallback">标称容量 (mAh)</string>
+    <string name="pref_capacity_fallback_summary">你的机型电池标称容量；未命中容量表时用它</string>
     <string name="pref_show_remaining">显示剩余容量</string>
     <string name="pref_show_remaining_summary">在组件上显示当前剩余的电量 (mAh)</string>
     <string name="pref_background">组件背景</string>
