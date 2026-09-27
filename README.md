@@ -9,8 +9,8 @@
 
 ## 下载 APK
 
-- **v1.0.3**（字体子集化，约 3.2MB）：[release/zmd-charge-v1.0.3.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.3.apk)
-- v1.0.2：[release/zmd-charge-v1.0.2.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.2.apk)
+- **v1.0.4**（最新，字体子集化约 3.2MB）：[release/zmd-charge-v1.0.4.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.4.apk)
+- 历史版本：v1.0.3 / v1.0.2 / v1.0.1 → [Releases](https://github.com/silicon-sbt/zmd-battery-widget/releases)
 
 > 说明：APK 内嵌 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），外观与完整字体一致，体积从约 20MB 降到 3MB。
 
@@ -20,7 +20,7 @@
 - **插入充电器**：短暂弹出**充电提示动画**（左发光闪电 logo + 右文：快充模式 / 充电中），**亮/暗双帧脉冲约 3.2 秒后自动收回**，回到电量显示
 - **健壮性**：提示动画不使用任何 `setAlpha/setFloat` 反射动作（华为/荣耀等第三方桌面对反射动作容错差，一旦 apply 失败组件会变成“加载窗口小工具时出现问题”）；每一帧都是完整可见的静态资源，另有一层超时自愈 + 极简兜底布局，确保组件不会因渲染异常而失效
 - **充电时进度环变绿色**（#4CD964），未充电为黄绿（#C6CA4C）
-- **低电量（<阈值）** 数字变红；**满充设计容量**按机型查内置表
+- **低电量（<阈值）** 数字变红；**满充设计容量**按机型查内置表，**手填可覆盖**（设置页会显示`当前生效 XXXX mAh · 依据：…`）
 - 点击组件进入**终末地风设置页**（原生 `androidx.preference` + 深炭/黄绿主题 + hero 顶部）
 - **运行日志**（设置页 → 诊断 → 运行日志）：记录插拔电、电量变化、每次组件渲染、前台服务生命周期、设置变更与**未捕获异常堆栈**，支持**分享 / 复制 / 清空**（256KB 自动滚动；同时镜像到 logcat，tag `ZmdCharge`）
 - 字体使用**鸿蒙开源字体 HarmonyOS Sans SC**
@@ -38,7 +38,9 @@
 ## 数据
 - 电量百分比：`ACTION_BATTERY_CHANGED` 的 `EXTRA_LEVEL/EXTRA_SCALE`
 - 剩余容量：按 `百分比×满充设计容量` 推算；若 `CHARGE_COUNTER` 读数与推算大致吻合(±25%)则优先采用，避免机型读数不准导致跳变
-- 满充设计容量：读 `Build.MODEL/DEVICE` 查 **内置容量表**（`DeviceCapacity.kt`）；未命中回退到设置页"容量表兜底值"
+- 满充设计容量优先级：**手填「标称容量」 > 内置容量表 > 默认 5500**
+  - 手填过「标称容量」会自动切到**手填优先**（也可用「强制使用手填容量」开关手动控制）
+  - 查表：读 `Build.MODEL | DEVICE | PRODUCT | MANUFACTURER | BRAND` 做**词边界匹配**（详见下方"设备容量表说明"）
 - 插入/拔出：`POWER_CONNECTED/DISCONNECTED` 触发充电提示动画
 
 ## 更新日志
@@ -91,17 +93,25 @@ gradle assembleDebug   # 产物：app/build/outputs/apk/debug/app-debug.apk
 也可用 Android Studio 直接打开本工程运行。
 
 ## 安装到手机
-1. 把 `app-debug.apk` 传入手机并安装（OriginOS 需允许"未知来源安装"）。
+1. 安装 [最新 Release APK](https://github.com/silicon-sbt/zmd-battery-widget/releases)（覆盖安装即可，不清数据；自签名/国产 ROM 需允许"未知来源安装"）。
 2. 长按桌面 → 小部件 → 找到 **"终末地电力"** 拖到桌面。
 3. 若刷新不及时：系统设置里将本应用设为"后台不限制/允许自启动"。
 
 ## 设备容量表说明
-内置容量表（`DeviceCapacity.kt`）约 **400 条**，覆盖主流机型：
+内置容量表（`DeviceCapacity.kt`）约 **600 条**，覆盖主流机型：
 iQOO / vivo、华为 / 荣耀、三星 Galaxy（S/Note/Z/A/M）、Google Pixel、小米 / 红米 / POCO、OPPO / 一加 / realme、摩托罗拉 / 联想、索尼 Xperia、华硕 ROG、Nothing、努比亚 / 红魔、魅族、中兴等。
 
-匹配规则：按 `Build.MODEL | DEVICE | PRODUCT` 做**子串匹配**（同时做「去掉空格/横线」的二次匹配，兼容 `Pixel 8 Pro` / `pixel8pro` / `SM-S928B` 等写法），**越具体的键排在越前面**，命中即返回。
+匹配规则（v1.0.4 起改为**词边界匹配**，避免误命中）：
 
-**未命中时使用设置页的「容量表兜底值」（默认 5500 mAh）**，你可以按实际机型手填。运行日志里会打印命中的键名（形如 `容量表=v2403a`），方便反馈补表。
+1. 键必须从**词的开头**开始匹配 —— 所以机型代码 `PLU110` 里不会再命中 `u1`
+2. **短键（<4 字符）必须是独立单词**（前面只能是空格/开头）—— `x9` 不会命中三星平板 `SM-X910`
+3. 去掉空格/横线的**宽松匹配只对 ≥6 字符的键生效**，兼容 `Pixel 8 Pro` / `pixel8pro` / `SM-S928B` 等写法
+4. **越具体的键排在越前面**，命中即返回
+
+**优先级：手填「标称容量」 > 内置容量表 > 默认 5500 mAh。** 机型被认错时有两种自救方式：
+① 直接在设置页填「标称容量」（填完自动切为手填优先）；② 打开「强制使用手填容量」开关。
+
+设置页会显示 `当前生效 5500 mAh · 依据：容量表:v2403a`（或 `手填（强制）` / `兜底值（表未命中）`），运行日志里也会打印 `容量来源=…`，方便反馈补表。
 
 ## 致谢 (Credits)
 
