@@ -27,6 +27,10 @@
             android:defaultValue="20"
             android:min="5"
             android:max="40"/>
+        <Preference
+            android:key="capacity_update"
+            android:title="@string/pref_capacity_update"
+            android:summary="@string/pref_capacity_update_summary"/>
         <SwitchPreference
             android:key="force_capacity"
             android:title="@string/pref_force_capacity"

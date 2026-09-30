@@ -79,6 +79,9 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         LogFile.init(this)
+        // 远程容量表：先加载本地缓存，再按 12h 节流后台刷新
+        com.zmd.charge.widget.CapacityStore.init(this)
+        com.zmd.charge.widget.CapacityStore.refreshAsync(this)
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_BATTERY_CHANGED)
             addAction(Intent.ACTION_POWER_CONNECTED)

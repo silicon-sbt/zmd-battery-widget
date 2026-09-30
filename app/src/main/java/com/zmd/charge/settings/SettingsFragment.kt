@@ -22,6 +22,7 @@ import com.zmd.charge.R
 import com.zmd.charge.log.LogActivity
 import com.zmd.charge.log.LogFile
 import com.zmd.charge.widget.BatteryWidgetProvider
+import com.zmd.charge.widget.CapacityStore
 import com.zmd.charge.widget.DeviceCapacity
 import com.zmd.charge.widget.WidgetMetrics
 
@@ -64,6 +65,23 @@ class SettingsFragment : PreferenceFragmentCompat(),
                 } catch (t: Throwable) {
                     LogFile.e("Settings", "切换手填优先失败", t)
                 }
+            }
+            true
+        }
+
+        // 手动更新远程容量表
+        findPreference<Preference>("capacity_update")?.setOnPreferenceClickListener {
+            try {
+                CapacityStore.refreshAsync(requireContext(), force = true)
+                Toast.makeText(requireContext(), "正在更新容量表…", Toast.LENGTH_SHORT).show()
+                handler.postDelayed({
+                    try {
+                        findPreference<Preference>("capacity_update")?.summary =
+                            CapacityStore.describe(requireContext())
+                    } catch (_: Throwable) {}
+                }, 5000)
+            } catch (t: Throwable) {
+                LogFile.e("Settings", "更新容量表失败", t)
             }
             true
         }
@@ -146,6 +164,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
             val eff = DeviceCapacity.lookup(ctx)
             findPreference<Preference>("capacity_fallback")?.summary =
                 "当前生效 " + eff + " mAh · 依据：" + DeviceCapacity.source(ctx)
+            findPreference<Preference>("capacity_update")?.summary = CapacityStore.describe(ctx)
         } catch (t: Throwable) {
             LogFile.e("Settings", "更新容量摘要失败", t)
         }

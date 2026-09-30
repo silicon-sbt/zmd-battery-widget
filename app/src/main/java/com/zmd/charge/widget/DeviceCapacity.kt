@@ -180,9 +180,68 @@ object DeviceCapacity {
         "mix fold 3" to 4800, "mix fold 2" to 4500, "mix fold" to 5020,
         "mix 4" to 4500, "mix 3" to 3200,
         "civi 4" to 4700, "civi 3" to 4500, "civi 2" to 4500, "civi" to 4500,
-        "redmi k70 pro" to 5000, "redmi k70" to 5000,
-        "redmi k60 pro" to 5000, "redmi k60" to 5500,
-        "redmi k50" to 5500, "redmi k40" to 4520, "redmi k30" to 4500, "redmi k20" to 4000,
+        // ---- 红米 K 系列 / Turbo：型号代码（代码取自小米型号对照表，容量取自充电头网全系盘点）----
+        "21121210c" to 4700,   // Redmi K50 电竞版
+        "22011211c" to 5000,   // Redmi K50 Pro
+        "22021211rc" to 4500,   // Redmi K40S
+        "22041211ac" to 5500,   // Redmi K50
+        "22081212c" to 5000,   // Redmi K50 至尊版
+        "22122rk93c" to 5500,   // Redmi K60E
+        "22127rk46c" to 5000,   // Redmi K60 Pro
+        "23013rk75c" to 5500,   // Redmi K60
+        "23078rkd5c" to 5000,   // Redmi K60 至尊版
+        "23113rkc6c" to 5000,   // Redmi K70
+        "23117rk66c" to 5000,   // Redmi K70 Pro
+        "2311drk48c" to 5500,   // Redmi K70E
+        "24069ra21c" to 5000,   // Redmi Turbo 3
+        "2407frk8ec" to 5500,   // Redmi K70 至尊版
+        "24117rk2cc" to 6550,   // Redmi K80
+        "24122rkc7c" to 6000,   // Redmi K80 Pro
+        "24127rk2cc" to 6000,   // Redmi K80 Pro 冠军版
+        "24129rt7cc" to 6550,   // Redmi Turbo 4
+        "25053rt47c" to 7550,   // Redmi Turbo 4 Pro
+        "25060rk16c" to 7500,   // Redmi K80 至尊版
+        "25102rk69c" to 7560,   // Redmi K90 Pro Max
+        "25102rkbec" to 7560,   // Redmi K90 Pro Max
+        "2510drk44c" to 7100,   // Redmi K90
+        "2511frt34c" to 7560,   // Redmi Turbo 5
+        "2602brt18c" to 9000,   // Redmi Turbo 5 Max
+        "2604frk1ec" to 8550,   // Redmi K90 Max
+        "2606frt34i" to 7560,   // Redmi Turbo 5
+        "m098fe" to 9070,   // Redmi K100 Pro Max
+        "m1903f10a" to 4000,   // Redmi K20
+        "m1903f10c" to 4000,   // Redmi K20
+        "m1903f10i" to 4000,   // Redmi K20
+        "m1903f11a" to 4000,   // Redmi K20 Pro
+        "m1903f11a" to 4000,   // Redmi K20 Pro 尊享版
+        "m1903f11c" to 4000,   // Redmi K20 Pro
+        "m1903f11i" to 4000,   // Redmi K20 Pro
+        "m1912g7bc" to 4500,   // Redmi K30 4G
+        "m1912g7be" to 4500,   // Redmi K30 4G
+        "m2001g7ac" to 4500,   // Redmi K30 5G
+        "m2001g7ac" to 4500,   // Redmi K30i 5G
+        "m2001g7ae" to 4500,   // Redmi K30 5G
+        "m2001j11c" to 4700,   // Redmi K30 Pro
+        "m2006j10c" to 4500,   // Redmi K30 至尊纪念版
+        "m2007j3sc" to 5000,   // Redmi K30S 至尊纪念版
+        "m2012k10c" to 5065,   // Redmi K40 游戏增强版
+        "m2012k11ac" to 4520,   // Redmi K40
+        "m2012k11c" to 4520,   // Redmi K40 Pro
+        "m2012k11c" to 4520,   // Redmi K40 Pro+
+        "m332bf" to 8550,   // Redmi K90 至尊版
+        "m511cd" to 9070,   // Redmi K100 Pro
+        // ---- 红米 K 系列 / Turbo：市场名兜底（部分地区/ROM 会上报市场名）----
+        "redmi k100 pro max" to 9070, "redmi k100 pro" to 9070,
+        "redmi k90 pro max" to 7560, "redmi k90 max" to 8550, "redmi k90" to 7100,
+        "redmi k80 ultra" to 7500, "redmi k80 pro" to 6000, "redmi k80" to 6550,
+        "redmi k70 ultra" to 5500, "redmi k70e" to 5500, "redmi k70 pro" to 5000, "redmi k70" to 5000,
+        "redmi k60 ultra" to 5000, "redmi k60e" to 5500, "redmi k60 pro" to 5000, "redmi k60" to 5500,
+        "redmi k50 ultra" to 5000, "redmi k50 电竞版" to 4700, "redmi k50 pro" to 5000, "redmi k50" to 5500,
+        "redmi k40 游戏增强版" to 5065, "redmi k40 pro" to 4520, "redmi k40s" to 4500, "redmi k40" to 4520,
+        "redmi k30s" to 5000, "redmi k30 pro" to 4700, "redmi k30i" to 4500, "redmi k30" to 4500,
+        "redmi k20 pro" to 4000, "redmi k20" to 4000,
+        "redmi turbo 5 max" to 9000, "redmi turbo 5" to 7560,
+        "redmi turbo 4 pro" to 7550, "redmi turbo 4" to 6550, "redmi turbo 3" to 5000,
         "redmi note 13 pro" to 5100, "redmi note 13" to 5000,
         "redmi note 12" to 5000, "redmi note 11" to 5000, "redmi note 10" to 5000,
         "redmi note 9" to 5020, "redmi note 8" to 4000, "redmi note 7" to 4000,
@@ -273,7 +332,7 @@ object DeviceCapacity {
     private const val MIN_LOOSE_KEY_LEN = 6
 
     fun lookup(context: Context): Int {
-        // 用户显式选择"强制手填"时，跳过查表
+        // 优先级：手填（强制） > 远程表 > 内置表 > 兜底值
         if (Prefs.forceCapacity(context)) return Prefs.capacityFallback(context)
         return matchKey()?.let { (_, cap) -> cap } ?: Prefs.capacityFallback(context)
     }
@@ -281,8 +340,9 @@ object DeviceCapacity {
     /** 当前生效容量的来源说明，给设置页摘要和日志用。 */
     fun source(context: Context): String {
         if (Prefs.forceCapacity(context)) return "手填（强制）"
-        val hit = matchKey()
-        return if (hit != null) "容量表:" + hit.first else "兜底值（表未命中）"
+        matchIn(CapacityStore.remoteEntries())?.let { return "远程表:" + it.first }
+        matchIn(TABLE)?.let { return "容量表:" + it.first }
+        return "兜底值（表未命中）"
     }
 
     private fun haystack(): String =
@@ -290,11 +350,16 @@ object DeviceCapacity {
                 Build.PRODUCT.orEmpty() + " | " + Build.MANUFACTURER.orEmpty() + " | " +
                 Build.BRAND.orEmpty()).lowercase()
 
-    /** 返回命中的 (键, 容量)；未命中返回 null。 */
-    private fun matchKey(): Pair<String, Int>? {
+    /** 先查远程表（可热更新），再查内置表。 */
+    private fun matchKey(): Pair<String, Int>? =
+        matchIn(CapacityStore.remoteEntries()) ?: matchIn(TABLE)
+
+    /** 在给定表里按顺序匹配；未命中返回 null。 */
+    private fun matchIn(table: List<Pair<String, Int>>): Pair<String, Int>? {
+        if (table.isEmpty()) return null
         val hay = haystack()
         val compact = squash(hay)
-        for (entry in TABLE) {
+        for (entry in table) {
             val key = entry.first
             // ① token 匹配：键必须从"词的边界"开始（前面是开头或非字母数字）。
             //    这样 "u1" 不会命中 "plu110"，但 "sm-s928" 仍能命中 "sm-s928b"。
@@ -344,5 +409,6 @@ object DeviceCapacity {
     /** 仅供调试/日志：返回命中的键名，未命中返回 null。 */
     fun matchedKey(): String? = matchKey()?.first
 
+    /** 内置表条数。 */
     val size: Int get() = TABLE.size
 }

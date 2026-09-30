@@ -5,6 +5,8 @@
     <string name="widget_desc">终末地风格 电量/容量 显示</string>
     <string name="settings_title">设置</string>
     <string name="pref_group_display">显示</string>
+    <string name="pref_capacity_update">容量表更新</string>
+    <string name="pref_capacity_update_summary">自动从云端拉取最新机型表（12 小时一次），点此立即更新</string>
     <string name="pref_force_capacity">强制使用手填容量</string>
     <string name="pref_force_capacity_summary">手填容量后会自动开启；开启即忽略内置容量表，始终用下面的数值</string>
     <string name="pref_capacity_fallback">标称容量 (mAh)</string>
