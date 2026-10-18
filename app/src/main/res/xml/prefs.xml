@@ -50,6 +50,26 @@
             android:title="@string/pref_live_service"
             android:summary="@string/pref_live_service_summary"
             android:defaultValue="false"/>
+        <SwitchPreference
+            android:key="charge_pop"
+            android:title="@string/pref_charge_pop"
+            android:summary="@string/pref_charge_pop_summary"
+            android:defaultValue="false"/>
+        <Preference
+            android:key="overlay_perm"
+            android:title="@string/pref_overlay_perm"
+            android:summary="@string/pref_overlay_perm_summary"/>
+        <SeekBarPreference
+            android:key="charge_pop_alpha"
+            android:title="@string/pref_charge_pop_alpha"
+            android:summary="@string/pref_charge_pop_alpha_summary"
+            android:defaultValue="100"
+            android:min="30"
+            android:max="100"/>
+        <Preference
+            android:key="preview_charge_pop"
+            android:title="@string/pref_preview_charge_pop"
+            android:summary="@string/pref_preview_charge_pop_summary"/>
         <Preference
             android:key="battery_opt"
             android:title="@string/pref_battery_opt"

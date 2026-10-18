@@ -25,6 +25,16 @@ object Prefs {
         return digits.toIntOrNull()?.coerceIn(0, 8) ?: 0
     }
 
+    /** 岛屿不透明度 30..100（%），默认 100。 */
+    fun chargePopAlpha(c: Context): Int {
+        val v = PreferenceManager.getDefaultSharedPreferences(c).getInt("charge_pop_alpha", 100)
+        return v.coerceIn(30, 100)
+    }
+
+    /** true=插电时弹出充电动画（依赖前台服务常驻）。 */
+    fun chargePop(c: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(c).getBoolean("charge_pop", false)
+
     /** true=忽略内置容量表，强制使用手填容量（机型被表误判时的逃生口）。 */
     fun forceCapacity(c: Context): Boolean =
         PreferenceManager.getDefaultSharedPreferences(c).getBoolean("force_capacity", false)

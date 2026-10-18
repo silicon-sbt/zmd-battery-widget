@@ -1,11 +1,13 @@
 package com.zmd.charge
 
+import android.app.Activity
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -25,6 +27,14 @@ import com.zmd.charge.widget.BatteryWidgetProvider
 class App : Application() {
 
     private val handler = Handler(Looper.getMainLooper())
+
+    companion object {
+        /** 当前是否有本应用自己的界面在前台（用来避免插电动画盖在自己的设置页上）。 */
+        @Volatile
+        var isUiVisible: Boolean = false
+            private set
+        private var uiVisibleCount = 0
+    }
     private var hintActive = false
     private var lastPercent = -1
     private var lastCharging: Boolean? = null
@@ -79,6 +89,21 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         LogFile.init(this)
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            override fun onActivityStarted(activity: Activity) {
+                uiVisibleCount++
+                isUiVisible = true
+            }
+            override fun onActivityStopped(activity: Activity) {
+                if (uiVisibleCount > 0) uiVisibleCount--
+                isUiVisible = uiVisibleCount > 0
+            }
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+            override fun onActivityResumed(activity: Activity) {}
+            override fun onActivityPaused(activity: Activity) {}
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+            override fun onActivityDestroyed(activity: Activity) {}
+        })
         // 远程容量表：先加载本地缓存，再按 12h 节流后台刷新
         com.zmd.charge.widget.CapacityStore.init(this)
         com.zmd.charge.widget.CapacityStore.refreshAsync(this)

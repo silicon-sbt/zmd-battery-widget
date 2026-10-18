@@ -9,7 +9,7 @@
 
 ## 下载 APK
 
-- **v1.0.4**（最新，字体子集化约 3.2MB）：[release/zmd-charge-v1.0.4.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.4.apk)
+- **v1.0.5**（最新，字体子集化约 3.2MB）：[release/zmd-charge-v1.0.5.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.5.apk)
 - 历史版本：v1.0.3 / v1.0.2 / v1.0.1 → [Releases](https://github.com/silicon-sbt/zmd-battery-widget/releases)
 
 > 说明：APK 内嵌 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），外观与完整字体一致，体积从约 20MB 降到 3MB。
@@ -18,6 +18,10 @@
 - **1×N 桌面小组件**（横向长条）：**首次添加自动铺满整行**（N=桌面横排格数），可长按拖动边缘改宽
 - 正常态复刻终末地"数字态"HUD：深炭胶囊、白色图标底板+深色闪电、**剩余/满充容量（等大数字 + mAh）**、百分比、右侧**黄绿进度环 + 手机徽章**
 - **插入充电器**：短暂弹出**充电提示动画**（左发光闪电 logo + 右文：快充模式 / 充电中），**亮/暗双帧脉冲约 3.2 秒后自动收回**，回到电量显示
+- **插入充电器时浮出「电量岛」**（可选，需授权）：状态栏下方浮出一条终末地风 HUD —— `/// 超充模式` 展开 → 收成胶囊显示 **剩余/满充 mAh + 百分比 + 电池徽章** → 约 6 秒自动收回。
+  - **需要授予「显示在其他应用上层」**（设置页有入口），否则岛只能在应用内用「预览」看到
+  - 可调**不透明度**（30~100）；设置页 **「预览插电动画」** 可一键看效果
+  - 悬浮窗方案，**桌面 / 任意 App 上都可见**；锁屏不可见（Android 限制）
 - **健壮性**：提示动画不使用任何 `setAlpha/setFloat` 反射动作（华为/荣耀等第三方桌面对反射动作容错差，一旦 apply 失败组件会变成“加载窗口小工具时出现问题”）；每一帧都是完整可见的静态资源，另有一层超时自愈 + 极简兜底布局，确保组件不会因渲染异常而失效
 - **充电时进度环变绿色**（#4CD964），未充电为黄绿（#C6CA4C）
 - **低电量（<阈值）** 数字变红；**满充设计容量**按机型查表（内置表 + **云端可更新的远程表**），**手填可覆盖**（设置页会显示`当前生效 XXXX mAh · 依据：…`）
@@ -43,7 +47,26 @@
   - 查表：读 `Build.MODEL | DEVICE | PRODUCT | MANUFACTURER | BRAND` 做**词边界匹配**（详见下方"设备容量表说明"）
 - 插入/拔出：`POWER_CONNECTED/DISCONNECTED` 触发充电提示动画
 
+## 兼容性说明
+
+本项目**不保证适配所有机型与 ROM** —— 尤其是国产系统对后台运行、悬浮窗、通知的策略差异很大。常见情况：
+
+- 插电不弹岛 / 弹了但看不到 → 多半是**没给悬浮窗权限**，或 App 被系统冻结（需加后台白名单/自启动）
+- 岛看起来半透明 → 已用多层叠加修复，若仍异常请反馈
+- 容量/电量数字不对 → 可在设置页手填「标称容量」，或反馈机型让我补表
+- 组件显示异常、字体缺失等
+
+**遇到问题请到 [Issues](https://github.com/silicon-sbt/zmd-battery-widget/issues) 反馈**，附上：机型、系统版本、以及 **设置页 → 诊断 → 运行日志 → 分享** 的内容。会持续修。
+
 ## 更新日志
+
+### v1.0.6（开发中）
+- **新增「电量岛」**：插电时在状态栏下方浮出终末地风 HUD（`/// 超充模式` 展开 → 收成胶囊显示 `剩余/满充 mAh + 百分比 + 电池徽章` → 约 6 秒自动收回）
+  - 悬浮窗实现，**桌面与任意 App 上可见**；需要「显示在其他应用上层」授权
+  - 可调**不透明度**（30~100）+ **预览**按钮
+  - HUD 采用 [NingmengLemon/EndfieldChargingAnim](https://github.com/NingmengLemon/EndfieldChargingAnim) 的 MIT 移植版（见致谢）
+- 修复国产 ROM 把第三方悬浮层按约 0.8 合成导致的"蒙灰"半透明（同内容叠 3 层窗口，等效 ≈0.99）
+- 打开应用时自动拉起前台服务（重装/被杀后自愈）
 
 ### v1.0.5
 - **容量表支持云端自动更新**：新增 `data/capacity.json`（仓库托管），App 启动时按 **12 小时节流**自动拉取，设置页 **「容量表更新」** 可手动立即更新
@@ -130,7 +153,13 @@ iQOO / vivo、华为 / 荣耀、三星 Galaxy（S/Note/Z/A/M）、Google Pixel�
 
 本项目的视觉风格与配色**强烈参考并复刻**自 [QinAnze/zmd-charge](https://github.com/QinAnze/zmd-charge)（Windows 端终末地风格电量 HUD）。**非常感谢原作者 QinAnze 开源并采用 MIT 许可**，让我能把这份好看的"终末地工业/超充"设计用在自己的安卓小组件上。本项目的底层实现（电量读取、桌面组件、设置页、充电动画）为原创，仅复用了它的视觉要素与实测色板。
 
+插电动画（「电量岛」）的 HUD 时间线与渲染，复用了 [NingmengLemon/EndfieldChargingAnim](https://github.com/NingmengLemon/EndfieldChargingAnim) 的实现。该项目原本是一个 **Xposed 模块**（root 后替换系统插拔充电动画），现已采用 **MIT 许可**，其 LICENSE 也注明动画移植自 `zmd-charge`。**非常感谢作者 NingmengLemon 开源**，让非 root 的安卓端也能用上这套 HUD。
+
 字体使用 **HarmonyOS Sans SC**（[ajacocks/harmonyos-sans-font](https://github.com/ajacocks/harmonyos-sans-font)，HUAWEI 开源、免费商用，见 `FONT_LICENSE.txt`）。
+## 交流
+
+QQ 群：**1001632909** —— 反馈机型适配、补容量表、提建议都欢迎，也可以直接在 [Issues](https://github.com/silicon-sbt/zmd-battery-widget/issues) 提。
+
 ## 许可 (License)
 
 本项目采用 **MIT License**，见 [LICENSE](LICENSE)。

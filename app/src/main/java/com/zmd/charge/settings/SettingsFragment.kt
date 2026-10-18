@@ -47,8 +47,30 @@ class SettingsFragment : PreferenceFragmentCompat(),
             openAppDetails()
             true
         }
+        findPreference<Preference>("overlay_perm")?.setOnPreferenceClickListener {
+            val ctx = context
+            if (ctx != null) {
+                try {
+                    startActivity(com.zmd.charge.chargepop.ChargePopOverlay.requestPermissionIntent(ctx))
+                } catch (t: Throwable) {
+                    Toast.makeText(ctx, "打开悬浮窗授权页失败，请到系统设置里手动允许", Toast.LENGTH_SHORT).show()
+                }
+            }
+            true
+        }
         findPreference<SwitchPreference>("live_service")?.setOnPreferenceChangeListener { _, newValue ->
             setLiveService(newValue as Boolean)
+            true
+        }
+        findPreference<SwitchPreference>("charge_pop")?.setOnPreferenceChangeListener { _, newValue ->
+            setChargePop(newValue as Boolean)
+            true
+        }
+        findPreference<Preference>("preview_charge_pop")?.setOnPreferenceClickListener {
+            val ctx = context
+            if (ctx != null) {
+                com.zmd.charge.chargepop.ChargePop.showNow(ctx)
+            }
             true
         }
 
@@ -114,6 +136,20 @@ class SettingsFragment : PreferenceFragmentCompat(),
             LogFile.e("Settings", "更新宽度摘要失败", t)
         }
         updateCapacitySummary()
+        ensureServiceRunning()
+    }
+
+    /** 只要任一"需要常驻"的开关是开的，打开应用就顺手把服务拉起来（重装/被杀后自愈）。 */
+    private fun ensureServiceRunning() {
+        val ctx = context ?: return
+        val sp = preferenceManager.sharedPreferences ?: return
+        val need = sp.getBoolean("live_service", false) || sp.getBoolean("charge_pop", false)
+        if (!need) return
+        try {
+            ContextCompat.startForegroundService(ctx, Intent(ctx, LiveService::class.java))
+        } catch (t: Throwable) {
+            LogFile.e("Settings", "拉起前台服务失败", t)
+        }
     }
 
     override fun onPause() {
@@ -136,6 +172,10 @@ class SettingsFragment : PreferenceFragmentCompat(),
         findPreference<Preference>("battery_opt")?.summary =
             if (ignoring) "已允许：电量/插拔电可实时刷新"
             else "未允许：点此授权，电量/插拔电即可实时刷新"
+        val canOverlay = com.zmd.charge.chargepop.ChargePopOverlay.canShow(ctx)
+        findPreference<Preference>("overlay_perm")?.summary =
+            if (canOverlay) "已允许：插电时岛可以盖在桌面/别的应用上"
+            else "未允许：点此授权，否则岛只在应用内可见"
     }
 
     private fun requestBatteryOptExemption() {
@@ -195,8 +235,37 @@ class SettingsFragment : PreferenceFragmentCompat(),
             } catch (_: Throwable) {}
             Toast.makeText(ctx, "已开启实时刷新（静默常驻通知）", Toast.LENGTH_SHORT).show()
         } else {
-            try { ctx.stopService(Intent(ctx, LiveService::class.java)) } catch (_: Throwable) {}
+            // 插电动画也挂在同一个服务上，别把它一起关了
+            if (!Prefs.chargePop(ctx)) {
+                try { ctx.stopService(Intent(ctx, LiveService::class.java)) } catch (_: Throwable) {}
+            }
             Toast.makeText(ctx, "已关闭实时刷新", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // ---------- 插电动画（复用同一个前台服务） ----------
+
+    private fun setChargePop(on: Boolean) {
+        val ctx = context ?: return
+        if (on) {
+            if (Build.VERSION.SDK_INT >= 33 &&
+                ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 102)
+            }
+            try {
+                ContextCompat.startForegroundService(ctx, Intent(ctx, LiveService::class.java))
+            } catch (_: Throwable) {}
+            LogFile.i("Settings", "开启插电动画")
+            Toast.makeText(ctx, "已开启：插电时弹动画（需保持后台常驻）", Toast.LENGTH_SHORT).show()
+        } else {
+            val liveOn = preferenceManager.sharedPreferences?.getBoolean("live_service", false) ?: false
+            if (!liveOn) {
+                try { ctx.stopService(Intent(ctx, LiveService::class.java)) } catch (_: Throwable) {}
+            }
+            LogFile.i("Settings", "关闭插电动画")
+            Toast.makeText(ctx, "已关闭插电动画", Toast.LENGTH_SHORT).show()
         }
     }
 

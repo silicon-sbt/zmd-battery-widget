@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- 插电"岛"要盖在桌面/别的应用上，只能走悬浮窗 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
 
     <application
@@ -46,6 +48,22 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/appwidget_provider"/>
         </receiver>
+        <activity
+            android:name=".chargepop.upstream.UpstreamChargePopActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:theme="@style/Theme.ZmdCharge.Pop"/>
+
+        <activity
+            android:name=".chargepop.ChargePopActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:theme="@style/Theme.ZmdCharge.Pop"/>
+
         <service
             android:name=".LiveService"
             android:exported="false"

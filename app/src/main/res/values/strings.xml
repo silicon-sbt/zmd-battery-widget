@@ -50,4 +50,13 @@
     <string name="log_copy">复制</string>
     <string name="log_clear">清空</string>
     <string name="log_meta_placeholder">正在统计…</string>
+    <string name="charge_pop_activity">com.zmd.charge.chargepop.upstream.UpstreamChargePopActivity</string>
+    <string name="pref_charge_pop">插电弹出充电动画</string>
+    <string name="pref_charge_pop_summary">插上充电器时在状态栏下方浮出电量岛，约 3 秒后收起；需要常驻通知与后台白名单</string>
+    <string name="pref_overlay_perm">允许显示在其他应用上层（岛）</string>
+    <string name="pref_overlay_perm_summary">不授权的话，岛只能在应用内看到</string>
+    <string name="pref_charge_pop_alpha">岛的不透明度</string>
+    <string name="pref_charge_pop_alpha_summary">100 = 完全不透明；调低会更透，能看到底下的内容</string>
+    <string name="pref_preview_charge_pop">预览插电动画</string>
+    <string name="pref_preview_charge_pop_summary">立刻播一遍，看看岛的样子</string>
 </resources>
