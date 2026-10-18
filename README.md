@@ -9,7 +9,7 @@
 
 ## 下载 APK
 
-- **v1.0.5**（最新，字体子集化约 3.2MB）：[release/zmd-charge-v1.0.5.apk](https://github.com/silicon-sbt/zmd-battery-widget/raw/main/release/zmd-charge-v1.0.5.apk)
+- **v1.0.6**（最新，字体子集化约 3.2MB）：[zmd-charge-v1.0.6.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6/zmd-charge-v1.0.6.apk)
 - 历史版本：v1.0.3 / v1.0.2 / v1.0.1 → [Releases](https://github.com/silicon-sbt/zmd-battery-widget/releases)
 
 > 说明：APK 内嵌 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），外观与完整字体一致，体积从约 20MB 降到 3MB。
@@ -60,7 +60,7 @@
 
 ## 更新日志
 
-### v1.0.6（开发中）
+### v1.0.6
 - **新增「电量岛」**：插电时在状态栏下方浮出终末地风 HUD（`/// 超充模式` 展开 → 收成胶囊显示 `剩余/满充 mAh + 百分比 + 电池徽章` → 约 6 秒自动收回）
   - 悬浮窗实现，**桌面与任意 App 上可见**；需要「显示在其他应用上层」授权
   - 可调**不透明度**（30~100）+ **预览**按钮
