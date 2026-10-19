@@ -9,7 +9,7 @@
 
 ## 下载 APK
 
-- **v1.0.6**（最新，字体子集化约 3.2MB）：[zmd-charge-v1.0.6.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6/zmd-charge-v1.0.6.apk)
+- **v1.0.6.1**（最新，字体子集化约 3.2MB）：[zmd-charge-v1.0.6.1.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6.1/zmd-charge-v1.0.6.1.apk)
 - 历史版本：v1.0.3 / v1.0.2 / v1.0.1 → [Releases](https://github.com/silicon-sbt/zmd-battery-widget/releases)
 
 > 说明：APK 内嵌 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），外观与完整字体一致，体积从约 20MB 降到 3MB。
@@ -47,6 +47,42 @@
   - 查表：读 `Build.MODEL | DEVICE | PRODUCT | MANUFACTURER | BRAND` 做**词边界匹配**（详见下方"设备容量表说明"）
 - 插入/拔出：`POWER_CONNECTED/DISCONNECTED` 触发充电提示动画
 
+## 「岛」为什么在某些场景不工作（技术限制说明）
+
+这一节把已知的**硬限制**写清楚，避免反复踩坑。所有结论都是真机实测（iQOO V2403A / OriginOS 6 / Android 16）。
+
+### 1. 锁屏上永远看不到 —— 做不到
+
+悬浮窗（`TYPE_APPLICATION_OVERLAY`）在 **keyguard 之下**，这是 Android 的窗口层级限制，任何第三方 App 都无法绕过。而 `showWhenLocked` 只有 Activity 能用，后台 `startActivity` 又会被系统静默拦掉（实测：`startActivity` 不抛异常、返回正常，但目标 Activity 的 `onCreate` 根本不执行）。
+
+息屏插电时，系统会先播它自己的 FlashCharge 充电动画（约 3 秒），App 做的只是**等它播完再补一枪**（延后 3.6 秒）。所以：
+
+- 亮屏/解锁状态插电 → 能看到岛 ✅
+- 息屏插电 → 只有系统动画，解锁后可能看到岛的尾巴 ❌
+
+真要锁屏可见，只有三条路：**root/Xposed 替换系统动画**（上游那个模块走的就是这条）、无障碍悬浮层（权限重，且 Android 17 高级保护模式会封杀非无障碍类应用）、全屏 Intent 通知（Android 14+ 需要用户单独授权「全屏通知」）。本项目选择不做。
+
+### 2. 会被国产 ROM 冻结 —— 只能缓解
+
+vivo/OriginOS 有一套私有后台管理（freezer）。App 静置一段时间后会被放进**冻结名单**（`dumpsys jobscheduler` 里 `frozen package name` 可见），**冻结期间连广播都收不到** —— 插电事件根本到不了 App，自然不弹。实测：
+
+- `am set-standby-bucket active`、`appops RUN_ANY_IN_BACKGROUND allow` 都**解不开**冻结；
+- 电池优化豁免也**不能**阻止冻结；
+- 冻结不是永久的：App 被使用过后一段时间内插电正常。
+
+**缓解**：设置页 → 后台运行 → **「后台保活自检」** 会显示当前状态（电池优化豁免 / 待机桶），有风险时给出「去开启白名单」按钮，跳到系统的后台高耗电管理页。但**冻结状态没有公开 API 可查**，只能提示风险。
+
+### 3. 看起来半透明 —— 已修，但原理值得知道
+
+实测 OriginOS 会把第三方悬浮层按 **约 0.8 不透明度合成**（纯黑探针渲染成 `#333333`，胶囊色 `#312F30` 渲染成 `#422A2C`，两处代入合成公式都精确等于 0.8）。所以单层窗口永远「蒙一层灰」。
+
+**修法**：同内容叠 **3 层**窗口，等效不透明度 `1-(1-0.8)^3 ≈ 0.99`；用户调低不透明度时按 `1-(1-target)^(1/3)` 反算单层 alpha。
+
+### 4. 无法「替换」系统充电动画 —— 非 root 做不到
+
+非 root App 最多**盖在**系统动画上面，做不到替换。上游那个项目是 Xposed 模块（root 后 hook 系统窗口），所以它能做到「插电瞬间只有一套动画」，我们只能「系统动画 + 我们的岛」先后出现。这是方案的根本差异，不是实现缺陷。
+
+---
 ## 兼容性说明
 
 本项目**不保证适配所有机型与 ROM** —— 尤其是国产系统对后台运行、悬浮窗、通知的策略差异很大。常见情况：
@@ -59,6 +95,11 @@
 **遇到问题请到 [Issues](https://github.com/silicon-sbt/zmd-battery-widget/issues) 反馈**，附上：机型、系统版本、以及 **设置页 → 诊断 → 运行日志 → 分享** 的内容。会持续修。
 
 ## 更新日志
+
+### v1.0.6.1
+- **修复「应用外插电有时不弹岛」**：删除了一处自己加的前台判断（vivo 下按 HOME 后 Activity 回调延迟，导致误判「还在前台」而静默跳过）
+- **新增设置页「后台保活自检」**：显示电池优化豁免 + 系统待机桶，有冻结风险时一键跳转后台白名单设置
+- README 新增「岛为什么在某些场景不工作」的技术限制说明
 
 ### v1.0.6
 - **新增「电量岛」**：插电时在状态栏下方浮出终末地风 HUD（`/// 超充模式` 展开 → 收成胶囊显示 `剩余/满充 mAh + 百分比 + 电池徽章` → 约 6 秒自动收回）
