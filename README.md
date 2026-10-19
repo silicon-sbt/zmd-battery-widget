@@ -19,7 +19,7 @@
 
 ## 下载 APK
 
-- **v1.0.6.1**（最新，字体子集化约 3.2MB）：[zmd-charge-v1.0.6.1.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6.1/zmd-charge-v1.0.6.1.apk)
+- **v1.0.6.2**（最新，**正好 3.25 MB** 的玩梗版）：[zmd-charge-v1.0.6.2.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6.2/zmd-charge-v1.0.6.2.apk)
 - 历史版本：v1.0.3 / v1.0.2 / v1.0.1 → [Releases](https://github.com/silicon-sbt/zmd-battery-widget/releases)
 
 > 说明：APK 内嵌 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），外观与完整字体一致，体积从约 20MB 降到 3MB。
@@ -105,6 +105,10 @@ vivo/OriginOS 有一套私有后台管理（freezer）。App 静置一段时间�
 **遇到问题请到 [Issues](https://github.com/silicon-sbt/zmd-battery-widget/issues) 反馈**，附上：机型、系统版本、以及 **设置页 → 诊断 → 运行日志 → 分享** 的内容。会持续修。
 
 ## 更新日志
+
+### v1.0.6.2
+- **安装包精确做成 3.25 MB**（3,407,872 字节），纯玩梗，功能与 v1.0.6.1 相同 —— 详见下方「彩蛋」章节
+- 实现：`assets/pad.bin`（不可压缩填充）+ `androidResources.noCompress`，体积可控到字节
 
 ### v1.0.6.1
 - **修复「应用外插电有时不弹岛」**：删除了一处自己加的前台判断（vivo 下按 HOME 后 Activity 回调延迟，导致误判「还在前台」而静默跳过）
