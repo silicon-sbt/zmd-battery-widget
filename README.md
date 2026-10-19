@@ -1,5 +1,15 @@
 # Zmd Charge · 终末地电量 安卓桌面小组件
 
+<p align="center">
+  <a href="https://github.com/silicon-sbt/zmd-battery-widget/releases"><img src="https://img.shields.io/github/v/release/silicon-sbt/zmd-battery-widget?style=flat-square&color=C6CA4C&label=release" alt="release"></a>
+  <a href="https://github.com/silicon-sbt/zmd-battery-widget/releases"><img src="https://img.shields.io/github/downloads/silicon-sbt/zmd-battery-widget/total?style=flat-square&color=4CD964&label=downloads" alt="downloads"></a>
+  <a href="https://github.com/silicon-sbt/zmd-battery-widget/stargazers"><img src="https://img.shields.io/github/stars/silicon-sbt/zmd-battery-widget?style=flat-square&color=C6CA4C&label=stars" alt="stars"></a>
+  <a href="https://github.com/silicon-sbt/zmd-battery-widget/issues"><img src="https://img.shields.io/github/issues/silicon-sbt/zmd-battery-widget?style=flat-square&color=FF4D4F&label=issues" alt="issues"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/silicon-sbt/zmd-battery-widget?style=flat-square&color=C6CA4C&label=license" alt="license"></a>
+  <img src="https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white" alt="platform">
+  <img src="https://img.shields.io/badge/Kotlin-2.0.20-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="kotlin">
+</p>
+
 一个复刻《明日方舟：终末地》工业/超充风格**电量桌面小组件**（Android AppWidget）。
 视觉与配色沿用 [QinAnze/zmd-charge](https://github.com/QinAnze/zmd-charge)（Windows 端灵动岛 HUD）的实测取色与矢量几何（MIT 许可）。
 
@@ -197,15 +207,24 @@ iQOO / vivo、华为 / 荣耀、三星 Galaxy（S/Note/Z/A/M）、Google Pixel�
 插电动画（「电量岛」）的 HUD 时间线与渲染，复用了 [NingmengLemon/EndfieldChargingAnim](https://github.com/NingmengLemon/EndfieldChargingAnim) 的实现。该项目原本是一个 **Xposed 模块**（root 后替换系统插拔充电动画），现已采用 **MIT 许可**，其 LICENSE 也注明动画移植自 `zmd-charge`。**非常感谢作者 NingmengLemon 开源**，让非 root 的安卓端也能用上这套 HUD。
 
 字体使用 **HarmonyOS Sans SC**（[ajacocks/harmonyos-sans-font](https://github.com/ajacocks/harmonyos-sans-font)，HUAWEI 开源、免费商用，见 `FONT_LICENSE.txt`）。
-## 赞助 (Donate)
+## 支持这个项目
 
-如果这个小组件对你有帮助，欢迎请作者喝杯奶茶 ☕
+这个项目是**业余时间免费维护**的，没有任何广告、追踪或内购，源码全部公开（MIT）。
+
+比起赞助，**下面这些「不要钱」的支持更实在**：
+
+- ⭐ 点个 **Star** —— 让更多需要的人搜得到
+- 🐛 遇到问题提 [**Issue**](https://github.com/silicon-sbt/zmd-battery-widget/issues)（附机型 / 系统版本 / 运行日志），帮我把适配做扎实
+- 📱 帮忙**补容量表** —— 你的机型没识别对，把「设置页 → 标称容量」的正确值和机型名发我
+- 💬 进 QQ 群 **1001632909** 反馈、聊天都行
 
 <p align="center">
-  <img src="docs/sponsor_wechat.jpg" width="280" alt="微信赞助码">
+  <sub>如果你确实想请作者喝杯奶茶，下面这个码随时都在 —— 但真的不必勉强 🙏</sub>
 </p>
 
-> 微信扫码即可。不在意的话，点个 Star、提个 Issue 帮忙补容量表，同样是很好的支持～
+<p align="center">
+  <img src="docs/sponsor_wechat.jpg" width="180" alt="微信赞助码">
+</p>
 
 ## 交流
 
