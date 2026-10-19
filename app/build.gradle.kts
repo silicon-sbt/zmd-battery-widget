@@ -11,8 +11,8 @@ android {
         applicationId = "com.zmd.charge"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.0.6"
+        versionCode = 9
+        versionName = "1.0.6.2"
     }
 
     buildTypes {
@@ -20,6 +20,11 @@ android {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+    // 彩蛋文件按原始字节存储，不做 zip 压缩 —— 这样 APK 体积可以精确控制到字节
+    androidResources {
+        noCompress += "pad.bin"
+        noCompress += "bin"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
