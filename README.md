@@ -197,6 +197,16 @@ iQOO / vivo、华为 / 荣耀、三星 Galaxy（S/Note/Z/A/M）、Google Pixel�
 插电动画（「电量岛」）的 HUD 时间线与渲染，复用了 [NingmengLemon/EndfieldChargingAnim](https://github.com/NingmengLemon/EndfieldChargingAnim) 的实现。该项目原本是一个 **Xposed 模块**（root 后替换系统插拔充电动画），现已采用 **MIT 许可**，其 LICENSE 也注明动画移植自 `zmd-charge`。**非常感谢作者 NingmengLemon 开源**，让非 root 的安卓端也能用上这套 HUD。
 
 字体使用 **HarmonyOS Sans SC**（[ajacocks/harmonyos-sans-font](https://github.com/ajacocks/harmonyos-sans-font)，HUAWEI 开源、免费商用，见 `FONT_LICENSE.txt`）。
+## 赞助 (Donate)
+
+如果这个小组件对你有帮助，欢迎请作者喝杯奶茶 ☕
+
+<p align="center">
+  <img src="docs/sponsor_wechat.jpg" width="280" alt="微信赞助码">
+</p>
+
+> 微信扫码即可。不在意的话，点个 Star、提个 Issue 帮忙补容量表，同样是很好的支持～
+
 ## 交流
 
 QQ 群：**1001632909** —— 反馈机型适配、补容量表、提建议都欢迎，也可以直接在 [Issues](https://github.com/silicon-sbt/zmd-battery-widget/issues) 提。
