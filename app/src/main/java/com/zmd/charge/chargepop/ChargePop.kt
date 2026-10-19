@@ -23,11 +23,9 @@ object ChargePop {
 
     /** 返回 true 表示这次真的发起了显示。 */
     fun show(ctx: Context): Boolean {
-        // 用户正在看本应用自己的界面时不弹岛（避免盖在设置页上）
-        if (com.zmd.charge.App.isUiVisible) {
-            LogFile.i("ChargePop", "本应用界面在前台，跳过插电动画")
-            return false
-        }
+        // 注：这里刻意不再判断"本应用是否在前台" —— 插电弹岛是核心功能，
+        // 任何场景（桌面/别的 App/自己的设置页）都该出现；旧判断在按 HOME 后
+        // 没有及时复位，会把应用外的插电误判成"在前台"而静默跳过。
         val now = SystemClock.elapsedRealtime()
         if (lastShownAt != 0L && now - lastShownAt < COOLDOWN_MS) {
             LogFile.i("ChargePop", "冷却中，跳过本次插电动画")

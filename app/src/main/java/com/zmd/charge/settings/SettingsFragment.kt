@@ -47,6 +47,33 @@ class SettingsFragment : PreferenceFragmentCompat(),
             openAppDetails()
             true
         }
+        findPreference<Preference>("keepalive_check")?.setOnPreferenceClickListener {
+            val ctx = context
+            if (ctx != null) {
+                BackgroundGuard.logState(ctx)
+                val desc = BackgroundGuard.describe(ctx)
+                val risky = desc.contains("风险")
+                AlertDialog.Builder(ctx, R.style.Theme_ZmdCharge_Dialog)
+                    .setTitle("后台保活自检")
+                    .setMessage(desc)
+                    .setPositiveButton("去开启白名单") { _, _ ->
+                        try {
+                            startActivity(BackgroundGuard.batteryOptIntent(ctx))
+                        } catch (t: Throwable) {
+                            try {
+                                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                            } catch (_: Throwable) {
+                            }
+                        }
+                    }
+                    .setNegativeButton("关闭", null)
+                    .show()
+                if (risky) {
+                    LogFile.i("Guard", "检测到后台风险：$desc")
+                }
+            }
+            true
+        }
         findPreference<Preference>("overlay_perm")?.setOnPreferenceClickListener {
             val ctx = context
             if (ctx != null) {
@@ -176,6 +203,8 @@ class SettingsFragment : PreferenceFragmentCompat(),
         findPreference<Preference>("overlay_perm")?.summary =
             if (canOverlay) "已允许：插电时岛可以盖在桌面/别的应用上"
             else "未允许：点此授权，否则岛只在应用内可见"
+        findPreference<Preference>("keepalive_check")?.summary =
+            BackgroundGuard.describe(ctx).replace("\n", " · ")
     }
 
     private fun requestBatteryOptExemption() {

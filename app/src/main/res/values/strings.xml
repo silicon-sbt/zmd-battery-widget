@@ -34,6 +34,8 @@
     <string name="pref_check_update">检查更新</string>
     <string name="pref_check_update_summary">点此检查是否有新版本</string>
     <string name="pref_group_runtime">后台运行（实时刷新）</string>
+    <string name="pref_keepalive_check">后台保活自检</string>
+    <string name="pref_keepalive_check_summary">检查是否可能被系统冻结（插电不弹岛的主因）</string>
     <string name="pref_battery_opt">允许后台运行（关闭电池优化）</string>
     <string name="pref_battery_opt_summary">授权后电量/插拔电可实时刷新</string>
     <string name="pref_autostart">允许自启动（OriginOS）</string>

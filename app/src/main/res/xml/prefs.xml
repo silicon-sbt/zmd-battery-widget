@@ -71,6 +71,10 @@
             android:title="@string/pref_preview_charge_pop"
             android:summary="@string/pref_preview_charge_pop_summary"/>
         <Preference
+            android:key="keepalive_check"
+            android:title="@string/pref_keepalive_check"
+            android:summary="@string/pref_keepalive_check_summary"/>
+        <Preference
             android:key="battery_opt"
             android:title="@string/pref_battery_opt"
             android:summary="@string/pref_battery_opt_summary"/>
