@@ -11,8 +11,8 @@ android {
         applicationId = "com.zmd.charge"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.0.6.2"
+        versionCode = 10
+        versionName = "1.0.7"
     }
 
     buildTypes {

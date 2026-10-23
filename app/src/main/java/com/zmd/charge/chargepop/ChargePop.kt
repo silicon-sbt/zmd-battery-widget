@@ -22,6 +22,7 @@ object ChargePop {
     }
 
     /** 返回 true 表示这次真的发起了显示。 */
+    @Synchronized
     fun show(ctx: Context): Boolean {
         // 注：这里刻意不再判断"本应用是否在前台" —— 插电弹岛是核心功能，
         // 任何场景（桌面/别的 App/自己的设置页）都该出现；旧判断在按 HOME 后
@@ -34,6 +35,7 @@ object ChargePop {
         return launch(ctx)
     }
 
+    @Synchronized
     private fun launch(ctx: Context): Boolean {
         // 优先走悬浮窗：只有它才能盖在桌面/别的 App 上
         val (level, plugged) = ChargePopOverlay.readSticky(ctx)

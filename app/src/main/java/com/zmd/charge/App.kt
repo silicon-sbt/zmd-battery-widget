@@ -120,6 +120,14 @@ class App : Application() {
         }
         // 兜底：即使进程被杀，也靠周期闹钟唤醒刷新组件（最多 1 分钟延迟）
         BatteryWidgetProvider.scheduleRefresh(this)
+
+        // 防冻结：进程一启动就重新武装「弹岛广播 + 充电 Job」。
+        // 进程活着就能从广播收插电；进程被冻死后靠 JobScheduler 充电任务拉起再补播。
+        try {
+            Keepalive.rearm(this)
+        } catch (t: Throwable) {
+            LogFile.e("App", "Keepalive.rearm 失败", t)
+        }
     }
 
     private fun startHint(context: Context) {

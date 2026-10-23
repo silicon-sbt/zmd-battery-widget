@@ -21,11 +21,15 @@ class BatteryWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, mgr: AppWidgetManager, ids: IntArray) {
         ids.forEach { renderWidget(context, mgr, it) }
+        // 防冻结：点组件/系统更新时是这个进程最可能被拉活的时机，顺手自愈（rearm 幂等）
+        try { com.zmd.charge.Keepalive.rearm(context) } catch (t: Throwable) {}
     }
 
     override fun onEnabled(context: Context) {
         // 组件被添加：启动周期刷新兜底
         scheduleRefresh(context)
+        // 防冻结：挂到"点组件添加"入口做自愈（rearm 幂等）
+        try { com.zmd.charge.Keepalive.rearm(context) } catch (t: Throwable) {}
     }
 
     override fun onDisabled(context: Context) {

@@ -28,7 +28,6 @@ import com.zmd.charge.widget.BatteryWidgetProvider
  */
 class LiveService : Service() {
 
-    private var powerReceiver: BroadcastReceiver? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private var pendingPop: Runnable? = null
 
@@ -61,61 +60,19 @@ class LiveService : Service() {
         } catch (t: Throwable) {
             LogFile.e("Service", "startForeground 失败", t)
         }
-        registerPower()
+        Keepalive.rearm(this)  // 弹岛广播 & 充电 Job 统一由 Keepalive 武装
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         LogFile.i("Service", "onStartCommand flags=" + flags)
         BatteryWidgetProvider.refresh(this)
-        registerPower()
+        Keepalive.rearm(this)  // 启动服务也从这里武装（幂等）
         return START_STICKY
-    }
-
-    /**
-     * 插拔电监听。注意：进程被厂商冻结时广播不会送达，
-     * 所以这条链路依赖"用户已把 App 加入后台白名单"。
-     */
-    private fun registerPower() {
-        if (powerReceiver != null) return
-        val r = object : BroadcastReceiver() {
-            override fun onReceive(c: Context, i: Intent) {
-                when (i.action) {
-                    Intent.ACTION_POWER_CONNECTED -> {
-                        LogFile.i("Service", "收到插电广播")
-                        if (!Prefs.chargePop(c)) return
-                        val pm = c.getSystemService(Context.POWER_SERVICE) as? PowerManager
-                        if (pm?.isInteractive != false) {
-                            ChargePop.show(c)
-                        } else {
-                            // 息屏插电时系统会先播自己的充电动画（OriginOS 的 FlashCharge 圆环会盖住整屏），
-                            // 延后一会儿再弹，否则会被压在下面看不见
-                            val task = Runnable { ChargePop.show(c) }
-                            pendingPop = task
-                            mainHandler.postDelayed(task, 3600L)
-                            LogFile.i("Service", "息屏插电，动画延后 3.6s（避让系统充电动画）")
-                        }
-                    }
-                    Intent.ACTION_POWER_DISCONNECTED -> LogFile.i("Service", "收到拔电广播")
-                }
-            }
-        }
-        val f = IntentFilter().apply {
-            addAction(Intent.ACTION_POWER_CONNECTED)
-            addAction(Intent.ACTION_POWER_DISCONNECTED)
-        }
-        try {
-            registerReceiver(r, f)
-            powerReceiver = r
-        } catch (t: Throwable) {
-            LogFile.e("Service", "注册电源广播失败", t)
-        }
     }
 
     override fun onDestroy() {
         pendingPop?.let { mainHandler.removeCallbacks(it) }
         pendingPop = null
-        powerReceiver?.let { try { unregisterReceiver(it) } catch (_: Throwable) {} }
-        powerReceiver = null
         LogFile.i("Service", "前台服务已停止")
         super.onDestroy()
     }
