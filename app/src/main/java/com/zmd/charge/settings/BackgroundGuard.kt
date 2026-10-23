@@ -61,7 +61,7 @@ object BackgroundGuard {
             append(if (ignoring) "电池优化：已豁免" else "电池优化：未豁免")
             append(" · 待机桶：").append(bucketName(bucket))
             if (risky) {
-                append("\n⚠️ 有被系统冻结的风险，可能导致插电不弹岛 —— 点此去开启后台白名单")
+                append("\n有被系统冻结的风险，可能导致插电不弹岛 —— 点此去开启后台白名单")
             } else {
                 append("\n后台状态正常")
             }
