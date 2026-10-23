@@ -16,9 +16,9 @@
 
 ## 下载
 
-**最新版 v1.0.6.2**（正好 3.25 MB 的玩梗版）：
+**最新版 v1.0.6.3**（正好 3.25 MB 的玩梗版）：
 
-- [zmd-charge-v1.0.6.2.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6.2/zmd-charge-v1.0.6.2.apk)
+- [zmd-charge-v1.0.6.3.apk](https://github.com/silicon-sbt/zmd-battery-widget/releases/download/v1.0.6.3/zmd-charge-v1.0.6.3.apk)
 - [Releases 全部版本](https://github.com/silicon-sbt/zmd-battery-widget/releases)
 
 APK 内嵌的 HarmonyOS Sans SC 字体已做**子集化**（仅含本应用用到的字符），体积从约 20MB 降到 3MB，外观与完整字体一致。
@@ -101,11 +101,12 @@ gradle assembleDebug   # 产物：app/build/outputs/apk/debug/app-debug.apk
 <details>
 <summary>展开历史版本</summary>
 
-### v1.0.7
-- **加固后台存活能力**：新增 JobScheduler 充电周期任务作为兜底唤醒；把「插拔电广播 + 充电任务 + 在充电时补弹岛」统一到一处，挂到开 App / 开机 / 点组件 / 任务唤醒等全部入口，每次进进程都重新武装（幂等）
-- **修复进程重启时连弹多次岛**：多个入口并发触发会重复补播（实测最多 8 次），加进程级一次性闸门并让插电播报与冷却检查原子化，收敛为 1 次
-- 移除已完成使命的旧版一次性任务，避免充电状态下反复空转
-- 补充 docs/安卓冻结机制调研.md：加入真机实测结论 —— 冻结中插电广播会被挂起（DEFERRED），JobScheduler 强推也不执行，解冻后一切立即恢复；因此 JobScheduler 只算「未冻结时的兜底」，真正的根治仍是系统后台白名单
+### v1.0.6.3
+- **后台存活做了加固**：把「插拔电广播 + 充电周期任务 + 在充电时补弹岛」统一到一处，挂到开 App、开机、点组件、任务唤醒等全部入口，每次进进程都重新武装
+- **修复插拔电偶发连弹多次岛**（实测最多 8 次），收敛为 1 次
+- **拔电不再误弹岛**
+- **设置页新增「后台高耗电管理」直达入口**（vivo/iQOO 的冻结开关就在这里，非 vivo 机型给通用指引）
+- 补充 docs/安卓冻结机制调研.md 的真机实测结论
 
 ### v1.0.6.2
 - **安装包精确做成 3.25 MB**（3,407,872 字节），纯玩梗，功能与 v1.0.6.1 相同 —— 详见下方「彩蛋」章节
