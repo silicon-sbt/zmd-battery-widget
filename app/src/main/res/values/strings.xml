@@ -40,6 +40,8 @@
     <string name="pref_battery_opt_summary">授权后电量/插拔电可实时刷新</string>
     <string name="pref_autostart">允许自启动（OriginOS）</string>
     <string name="pref_autostart_summary">在系统设置里允许本应用自启动/后台不限制</string>
+    <string name="pref_high_usage">后台高耗电管理（vivo/iQOO 关键项）</string>
+    <string name="pref_high_usage_summary">系统的冻结开关在这里：把本应用设为「允许 / 不限制」，否则静置后连插电广播都收不到</string>
     <string name="pref_live_service">实时刷新（前台服务）</string>
     <string name="pref_live_service_summary">常驻静默通知，换取毫秒级实时刷新（推荐开启）</string>
     <string name="pref_group_diag">诊断</string>

@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
 import com.zmd.charge.chargepop.ChargePop
 import com.zmd.charge.log.LogFile
 import com.zmd.charge.settings.Prefs
@@ -43,6 +44,16 @@ object Keepalive {
     /** 插拔电监听接收器（弹岛）。进程活着时动态注册即可，不依赖前台服务。 */
     private var powerReceiver: BroadcastReceiver? = null
 
+    /**
+     * 最近一次收到"拔电"广播的时刻。
+     * 用途：拔电后 sticky BATTERY_CHANGED 可能还滞后报"充电中"，
+     * 若此时某个入口（组件刷新/Job 唤醒）调 rearm，会误补弹一次岛。
+     * 拔电后 DISCONNECT_GUARD_MS 内一律不补播。
+     */
+    @Volatile
+    private var lastDisconnectAt = 0L
+    private const val DISCONNECT_GUARD_MS = 8_000L
+
     /** 统一自愈入口：所有唤醒路径都调它，幂等。 */
     fun rearm(context: Context) {
         registerPower(context)      // 1. 广播武装（进程活着才能收）
@@ -51,7 +62,7 @@ object Keepalive {
         //    加闸：进程刚启动时会有 App/LiveService/Job 等多个入口并发调 rearm，
         //    若各自都补播会连弹多次（实测 8 次）。这里限成"进程内只补播一次"。
         try {
-            if (Prefs.chargePop(context) && BatteryData.isCharging(context)) {
+            if (Prefs.chargePop(context) && BatteryData.isCharging(context) && !justDisconnected()) {
                 if (markRearmPopupOnce()) {
                     LogFile.i("Keepalive", "rearm：当前正在充电，补播一次插电动画")
                     ChargePop.show(context)
@@ -72,6 +83,15 @@ object Keepalive {
         return true
     }
 
+    /** 拔电后短时间内禁止补播（sticky 广播滞后会把"已拔电"误读成"充电中"）。 */
+    private fun justDisconnected(): Boolean =
+        lastDisconnectAt != 0L && SystemClock.elapsedRealtime() - lastDisconnectAt < DISCONNECT_GUARD_MS
+
+    @Synchronized
+    private fun resetRearmPopupGate() {
+        rearmPopupDone = false
+    }
+
     /**
      * 被 JobScheduler 唤醒时的入口：只重新武装广播 + 必要时补弹岛。
      * 刻意【不重排 any Job】—— 周期任务由系统自动重复触发，one-shot 由外部入口排，
@@ -80,7 +100,7 @@ object Keepalive {
     fun onWakeFromJob(context: Context) {
         registerPower(context)
         try {
-            if (Prefs.chargePop(context) && BatteryData.isCharging(context)) {
+            if (Prefs.chargePop(context) && BatteryData.isCharging(context) && !justDisconnected()) {
                 // 与 rearm 共用同一个"进程内只补播一次"闸，避免广播/Job/服务多入口连弹
                 if (markRearmPopupOnce()) {
                     LogFile.i("Keepalive", "Job 唤醒：当前在充电，补播插电动画")
@@ -125,7 +145,12 @@ object Keepalive {
                         LogFile.i("Keepalive", "收到插电广播")
                         onChargeConnected(c)
                     }
-                    Intent.ACTION_POWER_DISCONNECTED -> LogFile.i("Keepalive", "收到拔电广播")
+                    Intent.ACTION_POWER_DISCONNECTED -> {
+                        lastDisconnectAt = SystemClock.elapsedRealtime()
+                        // 拔电后复位补播闸：下次插电（哪怕是解冻补播）还能正常补一次
+                        resetRearmPopupGate()
+                        LogFile.i("Keepalive", "收到拔电广播（拔电不弹岛）")
+                    }
                 }
             }
         }

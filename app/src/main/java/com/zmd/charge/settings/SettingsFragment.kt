@@ -47,6 +47,10 @@ class SettingsFragment : PreferenceFragmentCompat(),
             openAppDetails()
             true
         }
+        findPreference<Preference>("high_usage")?.setOnPreferenceClickListener {
+            openHighUsage()
+            true
+        }
         findPreference<Preference>("keepalive_check")?.setOnPreferenceClickListener {
             val ctx = context
             if (ctx != null) {
@@ -236,6 +240,38 @@ class SettingsFragment : PreferenceFragmentCompat(),
             findPreference<Preference>("capacity_update")?.summary = CapacityStore.describe(ctx)
         } catch (t: Throwable) {
             LogFile.e("Settings", "更新容量摘要失败", t)
+        }
+    }
+
+    /**
+     * 跳 vivo/iQOO 的「后台高耗电管理」——那里才是决定 App 会不会被冻结的地方。
+     * 非 vivo 设备回落：先试标准电池优化页，再试应用详情。
+     */
+    private fun openHighUsage() {
+        val ctx = context ?: return
+        val vivo = BackgroundGuard.vivoHighUsageIntent()
+        if (vivo != null && BackgroundGuard.isVivoFamily()) {
+            try {
+                startActivity(vivo)
+                return
+            } catch (t: Throwable) {
+                LogFile.e("Guard", "打开后台高耗电管理失败，回落通用设置", t)
+            }
+        }
+        // 非 vivo / 页面不存在：给通用说明
+        try {
+            AlertDialog.Builder(ctx, R.style.Theme_ZmdCharge_Dialog)
+                .setTitle("后台高耗电管理")
+                .setMessage(
+                    "你的机型不是 vivo/iQOO，或没有这个页面。\n\n" +
+                        "通用做法是在系统设置里找到本应用，把「电池」设为「不限制 / 无限制」，" +
+                        "并允许「自启动」和「后台运行」。设置后静置一段时间再插电测试即可。"
+                )
+                .setPositiveButton("去应用详情") { _, _ -> openAppDetails() }
+                .setNegativeButton("关闭", null)
+                .show()
+        } catch (t: Throwable) {
+            LogFile.e("Guard", "显示高耗电指引失败", t)
         }
     }
 

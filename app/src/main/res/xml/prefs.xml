@@ -82,6 +82,10 @@
             android:key="autostart"
             android:title="@string/pref_autostart"
             android:summary="@string/pref_autostart_summary"/>
+        <Preference
+            android:key="high_usage"
+            android:title="@string/pref_high_usage"
+            android:summary="@string/pref_high_usage_summary"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_group_diag">

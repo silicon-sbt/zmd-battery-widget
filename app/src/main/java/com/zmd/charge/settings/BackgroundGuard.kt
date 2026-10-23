@@ -78,6 +78,32 @@ object BackgroundGuard {
         }
     }
 
+    /**
+     * vivo/iQOO 私有「后台高耗电管理」页面。
+     *
+     * 这是 vivo 冻结的真正开关所在地（com.iqoo.powersaving/.BackgroundHighUsageActivity）：
+     * 实测在 OriginOS 6 上，App 被它判定进冻结名单后，连插电广播都收不到，JobScheduler 也会被拦。
+     * 只有在这里把本应用设为「允许 / 不限制」才能真正解决。
+     *
+     * 返回 null 表示当前不是 vivo/iQOO，或页面不存在 —— 调用方应回落到通用设置页。
+     */
+    fun vivoHighUsageIntent(): Intent? {
+        return try {
+            val i = Intent()
+            i.setClassName("com.iqoo.powersaving", "com.iqoo.powersaving.BackgroundHighUsageActivity")
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            i
+        } catch (t: Throwable) {
+            null
+        }
+    }
+
+    /** 当前是不是 vivo/iQOO 系（仅用于把指引文案说对，不用于功能判断）。 */
+    fun isVivoFamily(): Boolean {
+        val m = (Build.MANUFACTURER + " " + Build.BRAND).lowercase()
+        return m.contains("vivo") || m.contains("iqoo")
+    }
+
     fun logState(ctx: Context) {
         try {
             LogFile.i(
